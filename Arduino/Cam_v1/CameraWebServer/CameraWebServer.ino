@@ -17,6 +17,7 @@ const char *password = "caca1919";
 const char *mqtt_server = "totox.local";
 const int mqtt_port = 8883;
 const char *topic_distancia = "sensor/distancia";
+const char *topic_led = "actuator/led";
 
 // ===========================
 // Certificats mTLS
@@ -115,6 +116,8 @@ const char* client_key = \
 const int LED1 = 18;
 const int LED2 = 19;
 const int LED3 = 21;
+// LED físico que controlará el mensaje desde MQTT (pin 5)
+const int LED_PIN = 5;
 
 // ===========================
 // Clients WiFi + MQTT
@@ -137,7 +140,29 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   String message;
   for (unsigned int i = 0; i < length; i++) message += (char)payload[i];
   Serial.println(message);
+  // Si el mensaje viene para controlar el LED del pin 5
+  if (strcmp(topic, topic_led) == 0) {
+    bool led_state = false;
+    // intentamos parsear JSON {"led": true}
+    StaticJsonDocument<128> doc_led;
+    DeserializationError err_led = deserializeJson(doc_led, message);
+    if (!err_led) {
+      if (doc_led.containsKey("led")) {
+        led_state = doc_led["led"];
+      } else if (doc_led.containsKey("state")) {
+        led_state = doc_led["state"];
+      }
+    } else {
+      // si no es JSON, aceptar valores simples: "1","0","true","false"
+      if (message.equals("1") || message.equalsIgnoreCase("true")) led_state = true;
+      else led_state = false;
+    }
+    digitalWrite(LED_PIN, led_state ? HIGH : LOW);
+    Serial.printf("[MQTT] Topic %s -> LED_PIN %d %s\n", topic, LED_PIN, led_state?"ON":"OFF");
+    return;
+  }
 
+  // Si el mensaje es de distancia, mantenemos la lógica existente
   StaticJsonDocument<256> doc;
   DeserializationError err = deserializeJson(doc, message);
   if (err) {
@@ -167,8 +192,11 @@ void reconnectMQTT() {
     Serial.print("Connexion MQTT (mTLS)...");
     if (client.connect("ESP32CAM_CLIENT")) {
       Serial.println("connecté !");
-      client.subscribe(topic_distancia);
-      Serial.printf("Abonné à %s\n", topic_distancia);
+        client.subscribe(topic_distancia);
+        Serial.printf("Abonné à %s\n", topic_distancia);
+        // suscribirse también al topic que controla el LED en el pin 5
+        client.subscribe(topic_led);
+        Serial.printf("Abonné à %s\n", topic_led);
     } else {
       Serial.print("Échec, rc=");
       Serial.print(client.state());
@@ -242,9 +270,12 @@ void setup() {
   pinMode(LED1, OUTPUT);
   pinMode(LED2, OUTPUT);
   pinMode(LED3, OUTPUT);
+  // pin para LED controlado por MQTT (pin 5)
+  pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED1, LOW);
   digitalWrite(LED2, LOW);
   digitalWrite(LED3, LOW);
+  digitalWrite(LED_PIN, LOW);
 
 #if defined(LED_GPIO_NUM)
   setupLedFlash();

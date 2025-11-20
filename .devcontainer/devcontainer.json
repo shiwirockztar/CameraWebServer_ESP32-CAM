@@ -18,7 +18,7 @@
         "esbenp.prettier-vscode",
         "rapidapi.vscode-rapidapi-client",
         "rapidapi.vscode-services",
-        "tabnine.tabnine-vscode",
+        //"tabnine.tabnine-vscode",
         "usernamehw.errorlens"
       ]
     }

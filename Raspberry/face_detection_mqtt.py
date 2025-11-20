@@ -10,6 +10,7 @@ BROKER = "totox.local"
 PORT = 8883
 TOPIC_ROSTRO = "sensor/rostro"
 TOPIC_DISTANCIA = "sensor/distancia"
+TOPIC_LED = "actuator/led"
 CA = "ca.crt"
 CERT = "server.crt"
 KEY = "server.key"
@@ -18,7 +19,10 @@ KEY = "server.key"
 URL = "http://192.168.61.202:81/stream"  # adapte
 cap = None
 detect_on = False
-LIMITE = 50  # cm
+LIMITE = 7  # cm
+
+# estado previo para detectar cambios y publicar comando al Arduino
+previous_detect_state = False
 
 ultimo_rostro = 0
 ultimo_estado = None
@@ -51,10 +55,20 @@ def on_connect(client, userdata, flags, rc):
         print("[MQTT] rc:", rc)
 
 def on_message(client, userdata, msg):
-    global detect_on
+    global detect_on, previous_detect_state
     try:
         data = json.loads(msg.payload.decode())
-        detect_on = data.get("distancia_cm", 9999) < LIMITE
+        new_detect = data.get("distancia_cm", 9999) < LIMITE
+        detect_on = new_detect
+        # si el estado cambió, publicar comando al topic del Arduino
+        if new_detect != previous_detect_state:
+            previous_detect_state = new_detect
+            try:
+                led_msg = {"led": bool(new_detect)}
+                client.publish(TOPIC_LED, json.dumps(led_msg))
+                print(f"[MQTT] LED -> {led_msg} en {TOPIC_LED}")
+            except Exception as e:
+                print("[MQTT] erreur publish LED:", e)
     except Exception as e:
         print("[MQTT] erreur message:", e)
 
