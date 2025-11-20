@@ -1,0 +1,27 @@
+{
+  "name": "Python 3.11 Codespace",
+  "image": "mcr.microsoft.com/vscode/devcontainers/python:0-3.11",
+  "forwardPorts": [8000],
+  "postCreateCommand": "pip install -r requirements.txt",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "github.copilot",
+        "github.copilot-chat",
+        "github.copilot-labs",
+        "github.remotehub",
+        "pkief.material-icon-theme",
+        "ms-vscode.remote-repositories",
+        "mechatroner.rainbow-csv",
+        "mhutchie.git-graph",
+        "esbenp.prettier-vscode",
+        "rapidapi.vscode-rapidapi-client",
+        "rapidapi.vscode-services",
+        "tabnine.tabnine-vscode",
+        "usernamehw.errorlens"
+      ]
+    }
+  },
+  "remoteUser": "vscode"
+}

@@ -37,3 +37,5 @@ Esto abrirá el visor y mostrará el resultado en pantalla si el script `detect-
 .\venv\Scripts\activate
 pip uninstall opencv-python opencv-python-headless -y
 pip install opencv-python
+
+$ git reset --soft HEAD~1
