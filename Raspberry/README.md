@@ -39,3 +39,22 @@ pip uninstall opencv-python opencv-python-headless -y
 pip install opencv-python
 
 $ git reset --soft HEAD~1
+
+
+## Modo de uso en Raspberry
+
+- **Requisitos:** Raspberry Pi con `NetworkManager` instalado (proporciona `nmcli`), interfaz Wi‑Fi `wlan0` disponible y permisos de `sudo`.
+
+- **Modo portal (hotspot):** se creó un alias para crear una red Wi‑Fi local (portal) que facilita pruebas sin depender de una red externa. Añade el alias a tu `~/.bash_aliases` o `~/.bashrc` para tenerlo disponible en cada sesión:
+
+```
+alias hotspot='sudo nmcli device wifi hotspot ifname wlan0 ssid RaspbeRed band bg password "12345678"'
+```
+
+- **Uso rápido:** en una terminal ejecuta `hotspot` (o `source ~/.bash_aliases` si acabas de añadirlo) y el Pi creará la red `RaspbeRed` con la contraseña `12345678`.
+
+- **Notas de seguridad:** la contraseña mostrada es un ejemplo. Cámbiala por una contraseña segura antes de exponer la red en entornos no controlados.
+
+- **Conectar el ESP32‑CAM o tu equipo de pruebas:** conecta el ESP32‑CAM (si está configurado como STA) o tu ordenador/telefono a la red `RaspbeRed`. Una vez conectado, podrás acceder al servidor web del ESP32‑CAM usando la IP que reciba desde el hotspot (por ejemplo `http://192.168.8.1:81/stream` o la IP asignada al dispositivo). Usa `ip addr` o `nmcli device show wlan0` para inspeccionar direcciones si es necesario.
+
+- **Hacer el alias persistente (opcional):** edita `~/.bash_aliases` y pega la línea del alias; luego ejecuta `source ~/.bash_aliases` o abre una nueva sesión para usar `hotspot` automáticamente.
