@@ -47,6 +47,7 @@ const char* ca_cert = \
 "ER+1JgNdegGytY6IAzPN0M5P7RF2wRm6FSfOihztwyydAVcM3bcyV1lhxtVJ\n" \
 "-----END CERTIFICATE-----\n" ;
 
+
 const char* client_cert = \
 "-----BEGIN CERTIFICATE-----\n" \
 "MIID+zCCAeOgAwIBAgIUF1XjY5MzjY6GMynHa98zc5vZ+2cwDQYJKoZIhvcNAQEL\n" \
@@ -72,6 +73,7 @@ const char* client_cert = \
 "fQcutjIa/ZwQ5IHassf71uYhfcm75TAixv8ytqC2ni6Bi/Cr3DexKXOMHy/skzwC\n" \
 "GsojdU0ZoRT+dBtay5gd\n" \
 "-----END CERTIFICATE-----\n";
+
 
 const char* client_key = \
 "-----BEGIN PRIVATE KEY-----\n" \
@@ -102,6 +104,7 @@ const char* client_key = \
 "ytCw2GK93WwpoldC7oP2gGsUkOxs4VZ3cDq8SNkOyY0+IOMILkxmj0geG2OF7Ahn\n" \
 "ZzB8eva/t+cxJApUtyzXD+E2\n" \
 "-----END PRIVATE KEY-----\n";
+
 
 // ===================== OBJETOS GLOBALES =====================
 
