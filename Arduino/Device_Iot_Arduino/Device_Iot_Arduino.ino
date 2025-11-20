@@ -5,8 +5,8 @@
 #include "time.h" // Para sincronización NTP
 
 // ===================== CONFIGURACIÓN Wi-Fi y MQTT =====================
-const char* ssid = "Totox";
-const char* password = "caca1919";
+const char *ssid = "abc";
+const char *password = "";
 const char* mqtt_server = "totox.local"; // Dirección o IP del broker
 const int mqtt_port = 8883;
 

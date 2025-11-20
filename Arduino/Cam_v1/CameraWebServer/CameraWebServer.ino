@@ -8,8 +8,8 @@
 // ===========================
 // WiFi credentials
 // ===========================
-const char *ssid = "Totox";
-const char *password = "caca1919";
+const char *ssid = "abc";
+const char *password = "";
 
 // ===========================
 // MQTT (mTLS)
