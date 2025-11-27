@@ -135,16 +135,29 @@ void setup_wifi() {
 
 // --- Sincronizar hora mediante NTP ---
 void syncTime() {
-  configTime(-5*3600, 0, "pool.ntp.org", "time.nist.gov");
-  Serial.print("Sincronizando hora");
+  // Usa un servidor NTP público
+  configTime(0, 0, "pool.ntp.org", "time.nist.gov");
+
+  Serial.print("Sincronizando hora...");
+  
   time_t now = time(nullptr);
-  while (now < 8 * 3600 * 2) {
+  int attempts = 0;
+  
+  // Intentar por un máximo de 10 intentos
+  while (now < 8 * 3600 * 2 && attempts < 10) {
     delay(500);
     Serial.print(".");
     now = time(nullptr);
+    attempts++;
   }
-  Serial.println("\nHora sincronizada");
+  
+  if (now > 8 * 3600 * 2) {
+    Serial.println("\nHora sincronizada");
+  } else {
+    Serial.println("\nError al sincronizar hora");
+  }
 }
+
 
 // --- Callback: maneja los mensajes recibidos por MQTT ---
 void callback(char* topic, byte* payload, unsigned int length) {

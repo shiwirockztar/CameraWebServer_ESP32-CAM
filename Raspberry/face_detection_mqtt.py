@@ -16,7 +16,7 @@ CERT = "server.crt"
 KEY = "server.key"
 
 # ===================== VARIABLES =====================
-URL = "http://192.168.61.202:81/stream"  # adapte
+URL = "http://10.42.0.202:81/stream"  # adapte
 cap = None
 detect_on = False
 LIMITE = 7  # cm
@@ -58,6 +58,7 @@ def on_message(client, userdata, msg):
     global detect_on, previous_detect_state
     try:
         data = json.loads(msg.payload.decode())
+        print(data)
         new_detect = data.get("distancia_cm", 9999) < LIMITE
         detect_on = new_detect
         # si el estado cambió, publicar comando al topic del Arduino
