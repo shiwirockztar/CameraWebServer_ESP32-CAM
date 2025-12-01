@@ -21,6 +21,23 @@ pip install ultralytics opencv-python numpy
 
 Estas dependencias son útiles si vas a ejecutar modelos (por ejemplo, con Ultralytics) o scripts que procesen imágenes desde la cámara.
 
+### En Raspberry (activar e instalar dependencias en `venv`)
+
+Si vas a usar un entorno virtual en la Raspberry, actívalo desde la raíz del proyecto con:
+
+```bash
+source venv/bin/activate
+```
+
+Después instala OpenCV (paquete adecuado para entornos sin GUI que proporciona `cv2`) y el cliente MQTT con:
+
+```bash
+pip install opencv-contrib-python-headless
+pip install paho-mqtt
+```
+
+Estas instrucciones aseguran que los scripts de detección y los clientes MQTT funcionen correctamente en una Raspberry Pi sin entorno gráfico.
+
 ### Ejecutar el detector (ejemplo)
 
 Con el entorno virtual activado, puedes ejecutar el script de detección contra el stream del ESP32-CAM. Por ejemplo (en cmd.exe):

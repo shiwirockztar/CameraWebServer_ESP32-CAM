@@ -232,6 +232,10 @@ float medirDistancia() {
 // --- Publicar datos de detección al broker ---
 void publicarDeteccion(float distancia) {
   StaticJsonDocument<256> doc;
+  if (distancia > 50) {
+    // No publicar si la distancia es mayor a 50 cm
+    return;
+  }
   doc["evento"] = "persona_detectada";
   doc["distancia_cm"] = distancia;
   doc["timestamp"] = obtenerHora();
