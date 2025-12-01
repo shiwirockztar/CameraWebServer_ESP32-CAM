@@ -62,6 +62,10 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     global detect_on, last_distancia_time, led_last_state
     try:
+        # Only handle messages coming from the distance topic
+        if msg.topic != TOPIC_DISTANCIA:
+            return
+
         data = json.loads(msg.payload.decode())
         print("[MQTT] distancia payload:", data)
         # keep original behavior for enabling detection based on distance
