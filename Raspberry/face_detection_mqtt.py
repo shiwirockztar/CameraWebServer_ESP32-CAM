@@ -24,6 +24,11 @@ LIMITE = 7  # cm
 # estado previo para detectar cambios y publicar comando al Arduino
 previous_detect_state = False
 
+# -- LED inactivity watchdog
+last_dist_msg_time = 0.0
+previous_led_state = None  # None/True/False
+INACTIVITY_TIMEOUT = 3.0  # seconds without messages on TOPIC_DISTANCIA -> turn LED off
+
 ultimo_rostro = 0
 ultimo_estado = None
 COOLDOWN = 2.0  # secondes
@@ -59,17 +64,23 @@ def on_message(client, userdata, msg):
     try:
         data = json.loads(msg.payload.decode())
         print(data)
+        # Update detect_on as before (used for face detection loop)
         new_detect = data.get("distancia_cm", 9999) < LIMITE
         detect_on = new_detect
-        # si el estado cambió, publicar comando al topic del Arduino
-        if new_detect != previous_detect_state:
-            previous_detect_state = new_detect
-            try:
-                led_msg = {"led": bool(new_detect)}
+
+        # Update last received time for distance messages
+        global last_dist_msg_time, previous_led_state
+        last_dist_msg_time = time.time()
+
+        # On each received distance message, publish LED=true (but avoid repeat publishes)
+        try:
+            if previous_led_state is not True:
+                led_msg = {"led": True}
                 client.publish(TOPIC_LED, json.dumps(led_msg))
+                previous_led_state = True
                 print(f"[MQTT] LED -> {led_msg} en {TOPIC_LED}")
-            except Exception as e:
-                print("[MQTT] erreur publish LED:", e)
+        except Exception as e:
+            print("[MQTT] erreur publish LED:", e)
     except Exception as e:
         print("[MQTT] erreur message:", e)
 
@@ -160,6 +171,18 @@ def detectar():
 # ===================== LOOP =====================
 try:
     while True:
+        # LED inactivity watchdog: if no distance messages received recently, send led=false
+        now = time.time()
+        try:
+            if last_dist_msg_time != 0 and (now - last_dist_msg_time) > INACTIVITY_TIMEOUT:
+                if previous_led_state is not False:
+                    led_msg = {"led": False}
+                    client.publish(TOPIC_LED, json.dumps(led_msg))
+                    previous_led_state = False
+                    print(f"[MQTT] LED -> {led_msg} en {TOPIC_LED} (inactivity)")
+        except Exception as e:
+            print("[MQTT] erreur publish LED inactivity:", e)
+
         if detect_on:
             detectar()
         else:
