@@ -16,7 +16,6 @@ const char *password = "";
 // ===========================
 const char *mqtt_server = "totox.local";
 const int mqtt_port = 8883;
-const char *topic_distancia = "sensor/distance";
 const char *topic_led = "actuator/led";
 
 // ===========================
@@ -163,23 +162,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
     Serial.printf("[MQTT] digitalRead(LED_GPIO_NUM) = %d\n", digitalRead(LED_GPIO_NUM));
     return;
   }
-
-  // If the message is from distance, keep the existing logic
-  StaticJsonDocument<256> doc;
-  DeserializationError err = deserializeJson(doc, message);
-  if (err) {
-    Serial.println("JSON Error!");
-    return;
-  }
-
-  float distance = doc["distance_cm"]; // get the distance
-  if (distance < 50.0) {
-    Serial.println("✅ Distance < 50cm : LEDs ON");
-    digitalWrite(LED_GPIO_NUM, HIGH);
-  } else {
-    Serial.println("❌ Distance >= 50cm : LEDs OFF");
-    digitalWrite(LED_GPIO_NUM, LOW);
-  }
+  // Diagnostic: read back pin level (may be inverted if LED is active-low)
   Serial.printf("[DIST] digitalRead(LED_GPIO_NUM) = %d\n", digitalRead(LED_GPIO_NUM));
 }
 
@@ -191,9 +174,7 @@ void reconnectMQTT() {
     Serial.print("MQTT Connection (mTLS)...");
     if (client.connect("ESP32CAM_CLIENT")) {
       Serial.println("Connected!");
-        client.subscribe(topic_distancia);
-        Serial.printf("Subscribed to %s\n", topic_distancia);
-        // also subscribe to the topic that controls the LED on pin 4
+        // subscribe to the topic that controls the LED on pin 4
         client.subscribe(topic_led);
         Serial.printf("Subscribed to %s\n", topic_led);
     } else {
@@ -264,11 +245,6 @@ void setup() {
     s->set_saturation(s, -2);
   }
   s->set_framesize(s, FRAMESIZE_QVGA);
-
-  // === LEDs ===
-  // pin for LED controlled by MQTT (pin 5)
-  //pinMode(LED_GPIO_NUM, OUTPUT);
-  //digitalWrite(LED_GPIO_NUM, LOW);
 
 #if defined(LED_GPIO_NUM)
   setupLedFlash();
