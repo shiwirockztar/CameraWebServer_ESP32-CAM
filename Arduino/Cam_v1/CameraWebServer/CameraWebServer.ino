@@ -1,6 +1,3 @@
-Sure! Here’s the translation of your code from French to English:
-
-```cpp
 #include "esp_camera.h"
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
@@ -72,51 +69,49 @@ const char* client_cert = \
 "HQ4EFgQUBFM7V2lqYtmNc4CwRJ+e/IgjtxowHwYDVR0jBBgwFoAU0jDXwkv9ls+S\n" \
 "RMuiXDJw4+ngQzIwDQYJKoZIhvcNAQELBQADggIBAMmrI2jeMqBx4yRTRoyAmC1N\n" \
 "1VQEpqi7dfUK7P3z2GkQBQslTZ7Mmqi1Um/5Hg5cV+FLp+4Ovhn73Qg05qWQjiye\n" \
-"uLljQB7ObUnFsXW3wQNZ3b9zYN1z8duqprwTFj
-```
-
-
-xfqBIs+TNmCf0v8g/kCRsczeCq\n" 
-"7fxH+aeIP2Saphv6YH47fDd+NtDZB13c17+BKAlrtoLEFySLTPwWrPijFaUU8pb1\n" 
-"/eBuhE42dFamUidxJ/Zz7CcqHy4Hn+PG0kQIJYDwHWQ4x2i3oqVUEatdCc9Lf5a0\n" 
-"CYKuxr/HEeCpFyjngk21wzPYcBSBaYkIbYO0404etmBlxtoLYl4x1ZlU+0ay7bVL\n" 
-"mS9oTk96RUVCbh91MJOeuj9YFnucCjTjiz4/rMpbD5T/qMyskS35tpo6g8rBgyxU\n" 
-"4JEDJDKYXoK+1skmboyRtFvgYzO5a8rXgeAYyKOZs/XsVSwjumaIZKhjsnURAIJ7\n" 
-"1pN00uGBbw2suBSLkFXUTRBNdqCGc+Hf/UrU4++cbhddjO9G6zlcW/hlkFJqrHCy\n" 
-"+BfC3GiUT8ZdTh8KzzjynrOELj1pDOJLNYfnj6B6A2RrzsiSu0quiaePmZNd/7nb\n" 
-"fQcutjIa/ZwQ5IHassf71uYhfcm75TAixv8ytqC2ni6Bi/Cr3DexKXOMHy/skzwC\n" 
-"GsojdU0ZoRT+dBtay5gd\n" 
+"uLljQB7ObUnFsXW3wQNZ3b9zYN1z8duqprwTFjxfqBIs+TNmCf0v8g/kCRsczeCq\n" \
+"7fxH+aeIP2Saphv6YH47fDd+NtDZB13c17+BKAlrtoLEFySLTPwWrPijFaUU8pb1\n" \
+"/eBuhE42dFamUidxJ/Zz7CcqHy4Hn+PG0kQIJYDwHWQ4x2i3oqVUEatdCc9Lf5a0\n" \
+"CYKuxr/HEeCpFyjngk21wzPYcBSBaYkIbYO0404etmBlxtoLYl4x1ZlU+0ay7bVL\n" \
+"mS9oTk96RUVCbh91MJOeuj9YFnucCjTjiz4/rMpbD5T/qMyskS35tpo6g8rBgyxU\n" \
+"4JEDJDKYXoK+1skmboyRtFvgYzO5a8rXgeAYyKOZs/XsVSwjumaIZKhjsnURAIJ7\n" \
+"1pN00uGBbw2suBSLkFXUTRBNdqCGc+Hf/UrU4++cbhddjO9G6zlcW/hlkFJqrHCy\n" \
+"+BfC3GiUT8ZdTh8KzzjynrOELj1pDOJLNYfnj6B6A2RrzsiSu0quiaePmZNd/7nb\n" \
+"fQcutjIa/ZwQ5IHassf71uYhfcm75TAixv8ytqC2ni6Bi/Cr3DexKXOMHy/skzwC\n" \
+"GsojdU0ZoRT+dBtay5gd\n" \
 "-----END CERTIFICATE-----\n";
 
-const char* client_key = 
-"-----BEGIN PRIVATE KEY-----\n" 
-"MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCTJKADvUwayVq9\n" 
-"djsWkk2vxDcgsJF9oQHilhJVKknj2bdFbnvo8zjQqHNmat/Qo5s4nHqX/Xr/P6Fj\n" 
-"giEX47v2s989dtthc0N1jCCaz4hQ2zCuwViZDdvPqJPLknn55wrYDUpweP1qxROK\n" 
-"gwsFOKdkVd67iE7dLQXh6r4OG1Hl5Z1bRTjHJYzpsGrIEiXTXSbLhcSrNnjCaPDn\n" 
-"8wBn8PlgZJewkaRjfJA2e3uhrLuifASO6W4OUwqvfZGulF6OztWCa2yqSJm8mOln\n" 
-"0DOYOOY38T8OKbVwtqOA67bcZNpy7GrnwAocFGomH0kA3UoqMcNz+HB+FDBGb5lK\n" 
-"xA0xSwctAgMBAAECggEANOi3BxEyw/ECSV0xmwipmZmvDvieoDNcd6rp1ajan+0h\n" 
-"6vvy301R8SmZMUsdxqqFvoH5zRxO9WhecmcQ2kO/y1JbZAEQmoZ1S9fCw5f7VsOy\n" 
-"Sixo3MQwdYeS+WDmrlcHPa/tw+qliRZrU+OR+2MnQbtk1z8IyJwPYPBlPbJSLR1r\n" 
-"X0PcxV2FnR4VCsJ2vlUx9CnPZXQhYG0N+EnO6ahyz9gB/7dtl32l2VlmfdKrAvFb\n" 
-"pL8NUAppc/fXAa/rlLQJyKvACOMoxlc2Tz5pZTHcADxLX/W5uXmwzDXJyhgi30qQ\n" 
-"MVn7CdqQAUpi1eAUclOJB/OprcoT8PmOJqJYtXP7OwKBgQDJU0vZofUi/sgm6Ull\n" 
-"ehQKrvQgw4/LVOVQqdg6NQ6r4jWi0sLdFyPpvnZCVz6vV3EQ686oK8N4MN3/m6aU\n" 
-"cxPShXqNH0CARpS9oVX9ieo3aSa0yFijyYmZl4fjthJx7y2BPv2wCfmZonfqWZO2\n" 
-"o7QqHmkL7xFWm0N5g5ggoyNPbwKBgQC7GmxF1i6rn3yGts6Z6p8Vp6Y8ivQ0nE2l\n" 
-"q6iIfWye2GOc4b8Zb9LHFKJrA+dB7JqQaQbszq2w4BB1DsN5T5c+iH2xQ4br9yCQ\n" 
-"7gR9NEQ67XG988lZOrkD6ovDjRyTSjFG1cI5ASgmmjZzC+pZpYFyNcWa2UPC+uBw\n" 
-"GXeB5rYFIwKBgB9xvxsSzLLWkHRjY29SDedNRBwJ71+WtupOXNNajhwSjMYNnRnj\n" 
-"D1zmvpnF/qhsQ+Ccs/5YN4OCPmo56V6uSp5K8sUv6GcgnwKvPDsJW2ekKMN7tzx9\n" 
-"sdwnarYKLf9VmAnjyMPCCxYP5iLYMtYH44/giA+xG0gnn/ZOs2gFkvJJAoGBAJA0\n" 
-"gkSlGl1eU6zEkqGgajJXf1FkS2mNGm9YyVFBUglvf/73IsFpJUwZBEF0xbVStaId\n" 
-"wJ+df9M2Lpj54wDJrikdK7sG76NIWgo52K3jLb85KJQdpA8oqlZxXH1Acki3Qxl0\n" 
-"QPiMgrSV4Od0xI+JdyZeeUmqsIZDs93SUwCEn79/AoGBAKD3jbUIpZVF6MSzURpf\n" 
-"mzhspnzXrYndvMFJuVttj0/OuLI36ARH/k6LFEYtBqGQKYTEZ0i6oN0MvL27jBxS\n" 
-"ytCw2GK93WwpoldC7oP2gGsUkOxs4VZ3cDq8SNkOyY0+IOMILkxmj0geG2OF7Ahn\n" 
-"ZzB8eva/t+cxJApUtyzXD+E2\n" 
+
+const char* client_key = \
+"-----BEGIN PRIVATE KEY-----\n" \
+"MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCTJKADvUwayVq9\n" \
+"djsWkk2vxDcgsJF9oQHilhJVKknj2bdFbnvo8zjQqHNmat/Qo5s4nHqX/Xr/P6Fj\n" \
+"giEX47v2s989dtthc0N1jCCaz4hQ2zCuwViZDdvPqJPLknn55wrYDUpweP1qxROK\n" \
+"gwsFOKdkVd67iE7dLQXh6r4OG1Hl5Z1bRTjHJYzpsGrIEiXTXSbLhcSrNnjCaPDn\n" \
+"8wBn8PlgZJewkaRjfJA2e3uhrLuifASO6W4OUwqvfZGulF6OztWCa2yqSJm8mOln\n" \
+"0DOYOOY38T8OKbVwtqOA67bcZNpy7GrnwAocFGomH0kA3UoqMcNz+HB+FDBGb5lK\n" \
+"xA0xSwctAgMBAAECggEANOi3BxEyw/ECSV0xmwipmZmvDvieoDNcd6rp1ajan+0h\n" \
+"6vvy301R8SmZMUsdxqqFvoH5zRxO9WhecmcQ2kO/y1JbZAEQmoZ1S9fCw5f7VsOy\n" \
+"Sixo3MQwdYeS+WDmrlcHPa/tw+qliRZrU+OR+2MnQbtk1z8IyJwPYPBlPbJSLR1r\n" \
+"X0PcxV2FnR4VCsJ2vlUx9CnPZXQhYG0N+EnO6ahyz9gB/7dtl32l2VlmfdKrAvFb\n" \
+"pL8NUAppc/fXAa/rlLQJyKvACOMoxlc2Tz5pZTHcADxLX/W5uXmwzDXJyhgi30qQ\n" \
+"MVn7CdqQAUpi1eAUclOJB/OprcoT8PmOJqJYtXP7OwKBgQDJU0vZofUi/sgm6Ull\n" \
+"ehQKrvQgw4/LVOVQqdg6NQ6r4jWi0sLdFyPpvnZCVz6vV3EQ686oK8N4MN3/m6aU\n" \
+"cxPShXqNH0CARpS9oVX9ieo3aSa0yFijyYmZl4fjthJx7y2BPv2wCfmZonfqWZO2\n" \
+"o7QqHmkL7xFWm0N5g5ggoyNPbwKBgQC7GmxF1i6rn3yGts6Z6p8Vp6Y8ivQ0nE2l\n" \
+"q6iIfWye2GOc4b8Zb9LHFKJrA+dB7JqQaQbszq2w4BB1DsN5T5c+iH2xQ4br9yCQ\n" \
+"7gR9NEQ67XG988lZOrkD6ovDjRyTSjFG1cI5ASgmmjZzC+pZpYFyNcWa2UPC+uBw\n" \
+"GXeB5rYFIwKBgB9xvxsSzLLWkHRjY29SDedNRBwJ71+WtupOXNNajhwSjMYNnRnj\n" \
+"D1zmvpnF/qhsQ+Ccs/5YN4OCPmo56V6uSp5K8sUv6GcgnwKvPDsJW2ekKMN7tzx9\n" \
+"sdwnarYKLf9VmAnjyMPCCxYP5iLYMtYH44/giA+xG0gnn/ZOs2gFkvJJAoGBAJA0\n" \
+"gkSlGl1eU6zEkqGgajJXf1FkS2mNGm9YyVFBUglvf/73IsFpJUwZBEF0xbVStaId\n" \
+"wJ+df9M2Lpj54wDJrikdK7sG76NIWgo52K3jLb85KJQdpA8oqlZxXH1Acki3Qxl0\n" \
+"QPiMgrSV4Od0xI+JdyZeeUmqsIZDs93SUwCEn79/AoGBAKD3jbUIpZVF6MSzURpf\n" \
+"mzhspnzXrYndvMFJuVttj0/OuLI36ARH/k6LFEYtBqGQKYTEZ0i6oN0MvL27jBxS\n" \
+"ytCw2GK93WwpoldC7oP2gGsUkOxs4VZ3cDq8SNkOyY0+IOMILkxmj0geG2OF7Ahn\n" \
+"ZzB8eva/t+cxJApUtyzXD+E2\n" \
 "-----END PRIVATE KEY-----\n";
+
 
 // ===========================
 // LED pins
@@ -141,178 +136,175 @@ void reconnectMQTT();
 // MQTT Callback
 // ===========================
 void mqttCallback(char* topic, byte* payload, unsigned int length) {
-Serial.printf("\n[MQTT] Message received on %s : ", topic);
-String message;
-for (unsigned int i = 0; i < length; i++) message += (char)payload[i];
-Serial.println(message);
-// If the message comes to control the LED on pin 4
-if (strcmp(topic, topic_led) == 0) {
-bool led_state = false;
-// attempt to parse JSON {"led": true}
-StaticJsonDocument<128> doc_led;
-DeserializationError err_led = deserializeJson(doc_led, message);
-if (!err_led) {
-if (doc_led.containsKey("led")) {
-led_state = doc_led["led"];
-} else if (doc_led.containsKey("state")) {
-led_state = doc_led["state"];
-}
-} else {
-// if it's not JSON, accept simple values: "1","0","true","false"
-if (message.equals("1") || message.equalsIgnoreCase("true")) led_state = true;
-else led_state = false;
-}
-digitalWrite(LED_GPIO_NUM, led_state ? HIGH : LOW);
-Serial.printf("[MQTT] Topic %s ->
+  Serial.printf("\n[MQTT] Message received on %s : ", topic);
+  String message;
+  for (unsigned int i = 0; i < length; i++) message += (char)payload[i];
+  Serial.println(message);
+  // If the message comes to control the LED on pin 4
+  if (strcmp(topic, topic_led) == 0) {
+    bool led_state = false;
+    // attempt to parse JSON {"led": true}
+    StaticJsonDocument<128> doc_led;
+    DeserializationError err_led = deserializeJson(doc_led, message);
+    if (!err_led) {
+      if (doc_led.containsKey("led")) {
+        led_state = doc_led["led"];
+      } else if (doc_led.containsKey("state")) {
+        led_state = doc_led["state"];
+      }
+    } else {
+      // if it's not JSON, accept simple values: "1","0","true","false"
+      if (message.equals("1") || message.equalsIgnoreCase("true")) led_state = true;
+      else led_state = false;
+    }
+    digitalWrite(LED_GPIO_NUM, led_state ? HIGH : LOW);
+    Serial.printf("[MQTT] Topic %s -> LED_GPIO_NUM %d %s\n", topic, LED_GPIO_NUM, led_state?"ON":"OFF");
+    return;
+  }
 
+  // If the message is from distance, keep the existing logic
+  StaticJsonDocument<256> doc;
+  DeserializationError err = deserializeJson(doc, message);
+  if (err) {
+    Serial.println("JSON Error!");
+    return;
+  }
 
-LED_GPIO_NUM %d %s\n", topic, LED_GPIO_NUM, led_state?"ON":"OFF");
-return;
-}
-
-// If the message is from distance, keep the existing logic
-StaticJsonDocument<256> doc;
-DeserializationError err = deserializeJson(doc, message);
-if (err) {
-Serial.println("JSON Error!");
-return;
-}
-
-float distance = doc["distance_cm"]; // get the distance
-if (distance < 50.0) {
-Serial.println("✅ Distance < 50cm : LEDs ON");
-digitalWrite(LED_GPIO_NUM, HIGH);
-} else {
-Serial.println("❌ Distance >= 50cm : LEDs OFF");
-digitalWrite(LED_GPIO_NUM, LOW);
-}
+  float distance = doc["distance_cm"]; // get the distance
+  if (distance < 50.0) {
+    Serial.println("✅ Distance < 50cm : LEDs ON");
+    digitalWrite(LED_GPIO_NUM, HIGH);
+  } else {
+    Serial.println("❌ Distance >= 50cm : LEDs OFF");
+    digitalWrite(LED_GPIO_NUM, LOW);
+  }
 }
 
 // ===========================
 // MQTT Reconnection
 // ===========================
 void reconnectMQTT() {
-while (!client.connected()) {
-Serial.print("MQTT Connection (mTLS)...");
-if (client.connect("ESP32CAM_CLIENT")) {
-Serial.println("Connected!");
-client.subscribe(topic_distancia);
-Serial.printf("Subscribed to %s\n", topic_distancia);
-// also subscribe to the topic that controls the LED on pin 4
-client.subscribe(topic_led);
-Serial.printf("Subscribed to %s\n", topic_led);
-} else {
-Serial.print("Failed, rc=");
-Serial.print(client.state());
-Serial.println(" => retrying in 5s");
-delay(5000);
-}
-}
+  while (!client.connected()) {
+    Serial.print("MQTT Connection (mTLS)...");
+    if (client.connect("ESP32CAM_CLIENT")) {
+      Serial.println("Connected!");
+        client.subscribe(topic_distancia);
+        Serial.printf("Subscribed to %s\n", topic_distancia);
+        // also subscribe to the topic that controls the LED on pin 4
+        client.subscribe(topic_led);
+        Serial.printf("Subscribed to %s\n", topic_led);
+    } else {
+      Serial.print("Failed, rc=");
+      Serial.print(client.state());
+      Serial.println(" => retrying in 5s");
+      delay(5000);
+    }
+  }
 }
 
 // ===========================
 // SETUP
 // ===========================
 void setup() {
-Serial.begin(115200);
-Serial.setDebugOutput(true);
-Serial.println();
+  Serial.begin(115200);
+  Serial.setDebugOutput(true);
+  Serial.println();
 
-// === Camera Configuration ===
-camera_config_t config;
-config.ledc_channel = LEDC_CHANNEL_0;
-config.ledc_timer = LEDC_TIMER_0;
-config.pin_d0 = Y2_GPIO_NUM;
-config.pin_d1 = Y3_GPIO_NUM;
-config.pin_d2 = Y4_GPIO_NUM;
-config.pin_d3 = Y5_GPIO_NUM;
-config.pin_d4 = Y6_GPIO_NUM;
-config.pin_d5 = Y7_GPIO_NUM;
-config.pin_d6 = Y8_GPIO_NUM;
-config.pin_d7 = Y9_GPIO_NUM;
-config.pin_xclk = XCLK_GPIO_NUM;
-config.pin_pclk = PCLK_GPIO_NUM;
-config.pin_vsync = VSYNC_GPIO_NUM;
-config.pin_href = HREF_GPIO_NUM;
-config.pin_sccb_sda = SIOD_GPIO_NUM;
-config.pin_sccb_scl = SIOC_GPIO_NUM;
-config.pin_pwdn = PWDN_GPIO_NUM;
-config.pin_reset = RESET_GPIO_NUM;
-config.xclk_freq_hz = 20000000;
-config.frame_size = FRAMESIZE_UXGA;
-config.pixel_format = PIXFORMAT_JPEG;
-config.grab_mode = CAMERA_GRAB_WHEN_EMPTY;
-config.fb_location = CAMERA_FB_IN_PSRAM;
-config.jpeg_quality = 12;
-config.fb_count = 1;
+  // === Camera Configuration ===
+  camera_config_t config;
+  config.ledc_channel = LEDC_CHANNEL_0;
+  config.ledc_timer = LEDC_TIMER_0;
+  config.pin_d0 = Y2_GPIO_NUM;
+  config.pin_d1 = Y3_GPIO_NUM;
+  config.pin_d2 = Y4_GPIO_NUM;
+  config.pin_d3 = Y5_GPIO_NUM;
+  config.pin_d4 = Y6_GPIO_NUM;
+  config.pin_d5 = Y7_GPIO_NUM;
+  config.pin_d6 = Y8_GPIO_NUM;
+  config.pin_d7 = Y9_GPIO_NUM;
+  config.pin_xclk = XCLK_GPIO_NUM;
+  config.pin_pclk = PCLK_GPIO_NUM;
+  config.pin_vsync = VSYNC_GPIO_NUM;
+  config.pin_href = HREF_GPIO_NUM;
+  config.pin_sccb_sda = SIOD_GPIO_NUM;
+  config.pin_sccb_scl = SIOC_GPIO_NUM;
+  config.pin_pwdn = PWDN_GPIO_NUM;
+  config.pin_reset = RESET_GPIO_NUM;
+  config.xclk_freq_hz = 20000000;
+  config.frame_size = FRAMESIZE_UXGA;
+  config.pixel_format = PIXFORMAT_JPEG;
+  config.grab_mode = CAMERA_GRAB_WHEN_EMPTY;
+  config.fb_location = CAMERA_FB_IN_PSRAM;
+  config.jpeg_quality = 12;
+  config.fb_count = 1;
 
-if (psramFound()) {
-config.jpeg_quality = 10;
-config.fb_count = 2;
-config.grab_mode = CAMERA_GRAB_LATEST;
-} else {
-config.frame_size = FRAMESIZE_SVGA;
-config.fb_location = CAMERA_FB_IN_DRAM;
-}
+  if (psramFound()) {
+    config.jpeg_quality = 10;
+    config.fb_count = 2;
+    config.grab_mode = CAMERA_GRAB_LATEST;
+  } else {
+    config.frame_size = FRAMESIZE_SVGA;
+    config.fb_location = CAMERA_FB_IN_DRAM;
+  }
 
-esp_err_t err = esp_camera_init(&config);
-if (err != ESP_OK) {
-Serial.printf("Camera init failed 0x%x", err);
-return;
-}
+  esp_err_t err = esp_camera_init(&config);
+  if (err != ESP_OK) {
+    Serial.printf("Camera init failed 0x%x", err);
+    return;
+  }
 
-// === Sensor Adjustment ===
-sensor_t *s = esp_camera_sensor_get();
-if (s->id.PID == OV3660_PID) {
-s->set_vflip(s, 1);
-s->set_brightness(s, 1);
-s->set_saturation(s, -2);
-}
-s->set_framesize(s, FRAMESIZE_QVGA);
+  // === Sensor Adjustment ===
+  sensor_t *s = esp_camera_sensor_get();
+  if (s->id.PID == OV3660_PID) {
+    s->set_vflip(s, 1);
+    s->set_brightness(s, 1);
+    s->set_saturation(s, -2);
+  }
+  s->set_framesize(s, FRAMESIZE_QVGA);
 
-// === LEDs ===
-// pin for LED controlled by MQTT (pin 5)
-//pinMode(LED_GPIO_NUM, OUTPUT);
-//digitalWrite(LED_GPIO_NUM, LOW);
+  // === LEDs ===
+  // pin for LED controlled by MQTT (pin 5)
+  //pinMode(LED_GPIO_NUM, OUTPUT);
+  //digitalWrite(LED_GPIO_NUM, LOW);
 
 #if defined(LED_GPIO_NUM)
-setupLedFlash();
+  setupLedFlash();
 #endif
 
-// === WiFi ===
-WiFi.begin(ssid, password);
-WiFi.setSleep(false);
-Serial.print("WiFi Connection");
-while (WiFi.status() != WL_CONNECTED) {
-delay(500);
-Serial.print(".");
-}
-Serial.println("\nWiFi connected!");
-Serial.print("IP: ");
-Serial.println(WiFi.localIP());
+  // === WiFi ===
+  WiFi.begin(ssid, password);
+  WiFi.setSleep(false);
+  Serial.print("WiFi Connection");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\nWiFi connected!");
+  Serial.print("IP: ");
+  Serial.println(WiFi.localIP());
 
-// === Start streaming ===
-startCameraServer();
+  // === Start streaming ===
+  startCameraServer();
 
-// === mTLS Configuration ===
-secureClient.setCACert(ca_cert);
-secureClient.setCertificate(client_cert);
-secureClient.setPrivateKey(client_key);
+  // === mTLS Configuration ===
+  secureClient.setCACert(ca_cert);
+  secureClient.setCertificate(client_cert);
+  secureClient.setPrivateKey(client_key);
 
-// === MQTT ===
-client.setServer(mqtt_server, mqtt_port);
-client.setCallback(mqttCallback);
-reconnectMQTT();
+  // === MQTT ===
+  client.setServer(mqtt_server, mqtt_port);
+  client.setCallback(mqttCallback);
+  reconnectMQTT();
 
-Serial.print("Camera ready! Stream: http://");
-Serial.println(WiFi.localIP());
+  Serial.print("Camera ready! Stream: http://");
+  Serial.println(WiFi.localIP());
 }
 
 // ===========================
 // LOOP
 // ===========================
 void loop() {
-if (!client.connected()) reconnectMQTT();
-client.loop();
-delay(10);
+  if (!client.connected()) reconnectMQTT();
+  client.loop();
+  delay(10);
 }
