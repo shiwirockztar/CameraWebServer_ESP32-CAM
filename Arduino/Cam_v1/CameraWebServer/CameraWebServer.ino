@@ -159,6 +159,8 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
     }
     digitalWrite(LED_GPIO_NUM, led_state ? HIGH : LOW);
     Serial.printf("[MQTT] Topic %s -> LED_GPIO_NUM %d %s\n", topic, LED_GPIO_NUM, led_state?"ON":"OFF");
+    // Diagnostic: read back pin level (may be inverted if LED is active-low)
+    Serial.printf("[MQTT] digitalRead(LED_GPIO_NUM) = %d\n", digitalRead(LED_GPIO_NUM));
     return;
   }
 
@@ -178,6 +180,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
     Serial.println("❌ Distance >= 50cm : LEDs OFF");
     digitalWrite(LED_GPIO_NUM, LOW);
   }
+  Serial.printf("[DIST] digitalRead(LED_GPIO_NUM) = %d\n", digitalRead(LED_GPIO_NUM));
 }
 
 // ===========================
@@ -269,6 +272,17 @@ void setup() {
 
 #if defined(LED_GPIO_NUM)
   setupLedFlash();
+  // Diagnostic: blink the LED to verify wiring and polarity
+  Serial.println("LED diagnostic: blinking to verify pin and polarity");
+  digitalWrite(LED_GPIO_NUM, HIGH);
+  delay(200);
+  digitalWrite(LED_GPIO_NUM, LOW);
+  delay(200);
+  digitalWrite(LED_GPIO_NUM, LOW);
+  delay(200);
+  digitalWrite(LED_GPIO_NUM, HIGH);
+  delay(200);
+  digitalWrite(LED_GPIO_NUM, LOW);
 #endif
 
   // === WiFi ===

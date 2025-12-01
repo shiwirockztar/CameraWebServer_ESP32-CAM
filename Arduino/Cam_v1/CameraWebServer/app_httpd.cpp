@@ -17,6 +17,7 @@
 #include "img_converters.h"
 #include "fb_gfx.h"
 #include "esp32-hal-ledc.h"
+#include <Arduino.h>
 #include "sdkconfig.h"
 #include "camera_index.h"
 #include "board_config.h"
@@ -841,7 +842,12 @@ void startCameraServer() {
 
 void setupLedFlash() {
 #if defined(LED_GPIO_NUM)
-  ledcAttach(LED_GPIO_NUM, 5000, 8);
+  // Configure the LED pin as output and ensure initial state is LOW.
+  // Previous implementation attempted to call `ledcAttach` with incorrect
+  // arguments; that did not configure the pin mode which prevented
+  // `digitalWrite(LED_GPIO_NUM, ...)` from working.
+  pinMode(LED_GPIO_NUM, OUTPUT);
+  digitalWrite(LED_GPIO_NUM, LOW);
 #else
   log_i("LED flash is disabled -> LED_GPIO_NUM undefined");
 #endif
