@@ -1,7 +1,7 @@
 # face_detection_mqtt.py
 import cv2
 import paho.mqtt.client as mqtt
-import time, json, pickle, threading
+import time, json, pickle
 from datetime import datetime
 import os
 
@@ -21,13 +21,12 @@ cap = None
 detect_on = False
 LIMITE = 7  # cm
 
-# Distance topic watchdog: track last received time and LED state
-last_distancia_time = 0.0
-led_last_state = False
-DIST_TIMEOUT = 3.0  # seconds without messages -> LED off
-
 # previous state to detect changes and publish commands to the Arduino
 previous_detect_state = False
+
+# Track last received message time for `sensor/distancia` and the last published LED state
+last_dist_msg_time = 0.0
+led_state_published = False
 
 last_face = 0
 last_state = None
@@ -60,30 +59,26 @@ def on_connect(client, userdata, flags, rc):
         print("[MQTT] rc:", rc)
 
 def on_message(client, userdata, msg):
-    global detect_on, last_distancia_time, led_last_state
+    global detect_on, previous_detect_state
+    global last_dist_msg_time, led_state_published
     try:
-        # Only handle messages coming from the distance topic
-        if msg.topic != TOPIC_DISTANCIA:
-            return
-
         data = json.loads(msg.payload.decode())
-        print("[MQTT] distancia payload:", data)
-        # keep original behavior for enabling detection based on distance
+        print(data)
+        # Update detection flag based on distance as before
         new_detect = data.get("distancia_cm", 9999) < LIMITE
         detect_on = new_detect
 
-        # Update last received time for the distance topic
-        last_distancia_time = time.time()
-
-        # Immediately publish LED ON when a distance message arrives
-        if not led_last_state:
+        # Mark that we received a message on the distance topic
+        last_dist_msg_time = time.time()
+        # While messages are being received, ensure LED=true is published (only on change)
+        if not led_state_published:
             try:
                 led_msg = {"led": True}
                 client.publish(TOPIC_LED, json.dumps(led_msg))
-                led_last_state = True
+                led_state_published = True
                 print(f"[MQTT] LED -> {led_msg} on {TOPIC_LED}")
             except Exception as e:
-                print("[MQTT] error publishing LED ON:", e)
+                print("[MQTT] error publishing LED:", e)
     except Exception as e:
         print("[MQTT] error with message:", e)
 
@@ -97,28 +92,6 @@ except Exception as e:
     print("[WARN] unable to configure TLS:", e)
 client.connect(BROKER, PORT, 60)
 client.loop_start()
-
-# Start a background watcher that publishes LED OFF if no distancia messages arrive
-def distancia_watcher():
-    global last_distancia_time, led_last_state
-    while True:
-        try:
-            now = time.time()
-            # if we previously set LED on and timeout expired -> publish off
-            if led_last_state and (now - last_distancia_time) > DIST_TIMEOUT:
-                try:
-                    led_msg = {"led": False}
-                    client.publish(TOPIC_LED, json.dumps(led_msg))
-                    led_last_state = False
-                    print(f"[WATCHER] No distancia msg for {DIST_TIMEOUT}s, published {led_msg} on {TOPIC_LED}")
-                except Exception as e:
-                    print("[WATCHER] error publishing LED OFF:", e)
-        except Exception as e:
-            print("[WATCHER] unexpected error:", e)
-        time.sleep(0.2)
-
-watcher_thread = threading.Thread(target=distancia_watcher, daemon=True)
-watcher_thread.start()
 
 # ===================== FACE DETECTION AND RECOGNITION =====================
 def detect():
@@ -200,6 +173,15 @@ try:
             detect()
         else:
             time.sleep(0.5)
+        # Check time since last distance message and publish LED=false if no messages for 3s
+        try:
+            if led_state_published and (time.time() - last_dist_msg_time) > 3.0:
+                led_msg = {"led": False}
+                client.publish(TOPIC_LED, json.dumps(led_msg))
+                led_state_published = False
+                print(f"[MQTT] LED -> {led_msg} on {TOPIC_LED} (no messages for 3s)")
+        except Exception as e:
+            print("[MQTT] error publishing LED off:", e)
         # keyboard management if GUI is available
         try:
             if cv2.waitKey(1) & 0xFF == ord('q'):
