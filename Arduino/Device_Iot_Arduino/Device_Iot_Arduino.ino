@@ -112,13 +112,23 @@ WiFiClientSecure espClient;
 PubSubClient client(espClient);
 
 
-// ===================== PINES =====================
-const int ledGreen = 2;   // LED ok
-const int ledRed   = 4;   // LED deny
-const int trigPin  = 5;
-const int echoPin  = 18;
-const int relayPin = 14;
-const int buzzerPin = 15;
+// ===================== PINES Esp32 Dev kit =====================
+/*
+const int ledGreen   = 2;   // LED ok (GPIO 2)
+const int ledRed     = 4;   // LED deny (GPIO 4)
+const int trigPin    = 5;   // Trigger del sensor ultrasónico (GPIO 5)
+const int echoPin    = 18;  // Echo del sensor ultrasónico (GPIO 18)
+const int relayPin   = 14;  // Pin para controlar el relay (GPIO 14)
+const int buzzerPin  = 15;  // Buzzer (GPIO 15)
+*/
+
+// ===================== PINES  Nodemu lolin  =====================
+
+const int ledRed = 2;   // LED integrado (GPIO 2)
+const int trigPin = 5;   // Trigger (D1)
+const int echoPin = 13;  // Echo (D7)
+const int relayPin = 14; // Relay (D5)
+const int buzzerPin = 15; // Buzzer (D8)
 
 // ===================== FUNCIONES =====================
 
