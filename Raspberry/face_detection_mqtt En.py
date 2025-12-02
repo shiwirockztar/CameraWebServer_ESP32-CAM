@@ -1,4 +1,4 @@
-# face_detection_production_headless_debug.py
+# face_detection_production_headless_cooldown_v2.py
 import cv2
 import paho.mqtt.client as mqtt
 import time, json, pickle, threading
@@ -41,9 +41,14 @@ led_last_state = False
 DIST_TIMEOUT = 3.0  # seconds without messages -> LED off
 
 # Variables de détection
-last_face = 0.0 # Sera initialisé à time.time() après l'ouverture de la caméra
+last_face = 0.0
 last_state = None
-COOLDOWN = 2.0  # seconds
+COOLDOWN = 2.0  # seconds (cooldown après FALSE)
+REARM_COOLDOWN = 5.0 # NOUVEAU: Cooldown après détection TRUE
+
+# État du temporisateur de réactivation
+rearm_timer = None 
+
 
 MODEL_FILE = "face_model.yml"
 LABELS_FILE = "labels.pkl"
@@ -74,6 +79,15 @@ recognizer.read(MODEL_FILE)
 
 cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
 
+
+# ===================== FONCTION DE RÉARMEMENT =====================
+def rearm_detection():
+    """Réactive la détection après le cooldown de 5 secondes."""
+    global detect_on
+    detect_on = True
+    print(f"[SYSTEM] Détection réactivée après {REARM_COOLDOWN}s de repos.")
+
+
 # ===================== MQTT CALLBACKS & WATCHDOG =====================
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
@@ -83,7 +97,7 @@ def on_connect(client, userdata, flags, rc):
         print("[MQTT] rc:", rc)
 
 def on_message(client, userdata, msg):
-    global detect_on, last_distancia_time, led_last_state
+    global detect_on, last_distancia_time, led_last_state, rearm_timer
     try:
         data = json.loads(msg.payload.decode())
         print("[MQTT] distancia payload:", data)
@@ -98,7 +112,10 @@ def on_message(client, userdata, msg):
             )
             
         new_detect = data.get("distancia_cm", 9999) < LIMITE
-        detect_on = new_detect
+        
+        # ACTIVER LA DETECTION SEULEMENT SI LE TEMPORISATEUR N'EST PAS ACTIF
+        if rearm_timer is None or not rearm_timer.is_alive():
+            detect_on = new_detect
 
         last_distancia_time = time.time()
 
@@ -131,7 +148,7 @@ except Exception as e:
 client.connect(BROKER, PORT, 60)
 client.loop_start()
 
-# Watchdog Thread
+# Watchdog Thread (inchangé)
 def distancia_watcher():
     global last_distancia_time, led_last_state
     while True:
@@ -160,7 +177,7 @@ watcher_thread.start()
 
 # ===================== FACE DETECTION AND RECOGNITION =====================
 def detect():
-    global cap, last_face, last_state
+    global cap, last_face, last_state, detect_on, rearm_timer
     
     # Initialisation de la caméra (CORRIGÉE : initialisation du chronomètre)
     if cap is None:
@@ -170,14 +187,14 @@ def detect():
             return
         else:
             global last_face
-            last_face = time.time() # CORRECTION: Initialise le chronomètre ici
+            last_face = time.time() # Initialise le chronomètre ici
             print("[INFO] Stream opened and detection loop initiated.")
 
     ret, frame = cap.read()
     if not ret:
         return
 
-    # Le code de rotation a été retiré, nous continuons directement.
+    # Le code de rotation a été retiré.
     
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     detected = cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(50,50))
@@ -193,7 +210,7 @@ def detect():
 
         # predict
         label, confidence = recognizer.predict(face_resized)
-        THRESH = 110.0
+        THRESH = 85.0 # Seuil ajusté à 85.0 comme demandé
         name = "Unknown"
         
         if confidence <= THRESH and label in label_to_name:
@@ -203,7 +220,7 @@ def detect():
             # DEBUG : Impression directe dans la console
             print(f"[DEBUG] Visage détecté : {name} | Confiance: {int(confidence)}")
 
-            # PUBLICATION TRUE
+            # --- LOGIQUE D'AUTORISATION ET DE REPOS ---
             if last_state != True:
                 msg = {
                     "authorization": True,
@@ -212,14 +229,24 @@ def detect():
                     "confidence": float(confidence)
                 }
                 client.publish(TOPIC_ROSTRO, json.dumps(msg))
-                print(f"[MQTT] Autorisation TRUE publiée pour {name}")
+                print(f"[MQTT] Autorisation TRUE publiée pour {name}. Démarrage du repos de {REARM_COOLDOWN}s.")
                 last_state = True
+                
+                # 1. DÉSACVITER LA DÉTECTION IMMÉDIATEMENT
+                detect_on = False
+                
+                # 2. DÉMARRER LE TEMPORISATEUR DE RÉACTIVATION
+                rearm_timer = threading.Timer(REARM_COOLDOWN, rearm_detection)
+                rearm_timer.start()
+
+                # On arrête de traiter les autres visages si on a trouvé un match
+                break 
         else:
              # DEBUG : Impression directe dans la console pour visage non reconnu
              print(f"[DEBUG] Visage détecté : UNKNOWN | Confiance: {int(confidence)}")
 
-    # no face recognized -> publish False after cooldown
-    if not face_detected and (now - last_face > COOLDOWN) and last_state != False:
+    # no face recognized -> publish False after cooldown (si pas en repos)
+    if not face_detected and (now - last_face > COOLDOWN) and last_state != False and detect_on:
         msg = {"authorization": False, "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
         client.publish(TOPIC_ROSTRO, json.dumps(msg))
         print("[MQTT] Autorisation FALSE publiée.")
@@ -232,9 +259,11 @@ def detect():
 if __name__ == "__main__":
     try:
         while True:
+            # detect() est appelé seulement si detect_on est True
             if detect_on:
                 detect()
             else:
+                # Repos forcé pour économiser le CPU/Caméra
                 time.sleep(0.5)
             
     except KeyboardInterrupt:
