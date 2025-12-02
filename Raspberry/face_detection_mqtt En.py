@@ -1,4 +1,4 @@
-# face_detection_production_headless_cooldown_v2.py
+# face_detection_production_headless_cooldown_v3.py
 import cv2
 import paho.mqtt.client as mqtt
 import time, json, pickle, threading
@@ -41,14 +41,13 @@ led_last_state = False
 DIST_TIMEOUT = 3.0  # seconds without messages -> LED off
 
 # Variables de détection
-last_face = 0.0
+last_face = 0.0 
 last_state = None
 COOLDOWN = 2.0  # seconds (cooldown après FALSE)
 REARM_COOLDOWN = 5.0 # NOUVEAU: Cooldown après détection TRUE
 
 # État du temporisateur de réactivation
 rearm_timer = None 
-
 
 MODEL_FILE = "face_model.yml"
 LABELS_FILE = "labels.pkl"
@@ -193,8 +192,6 @@ def detect():
     ret, frame = cap.read()
     if not ret:
         return
-
-    # Le code de rotation a été retiré.
     
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     detected = cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(50,50))
@@ -210,15 +207,19 @@ def detect():
 
         # predict
         label, confidence = recognizer.predict(face_resized)
-        THRESH = 85.0 # Seuil ajusté à 85.0 comme demandé
+        
+        # **** NOUVEAU SEUIL DE DÉCLENCHEMENT/AFFICHAGE ****
+        THRESH = 95.0 
+        
         name = "Unknown"
         
-        if confidence <= THRESH and label in label_to_name:
+        # La condition est maintenant: La confiance doit être < 95.0
+        if confidence < THRESH and label in label_to_name:
             name = label_to_name[label]
             face_detected = True
             
-            # DEBUG : Impression directe dans la console
-            print(f"[DEBUG] Visage détecté : {name} | Confiance: {int(confidence)}")
+            # DEBUG : Impression directe dans la console pour la détection valide
+            print(f"[DEBUG] Visage détecté : {name} | Confiance: {int(confidence)} (SOUS LE SEUIL DE {THRESH})")
 
             # --- LOGIQUE D'AUTORISATION ET DE REPOS ---
             if last_state != True:
@@ -239,13 +240,13 @@ def detect():
                 rearm_timer = threading.Timer(REARM_COOLDOWN, rearm_detection)
                 rearm_timer.start()
 
-                # On arrête de traiter les autres visages si on a trouvé un match
                 break 
-        else:
-             # DEBUG : Impression directe dans la console pour visage non reconnu
-             print(f"[DEBUG] Visage détecté : UNKNOWN | Confiance: {int(confidence)}")
+        
+        # NOUVEAU: Si le visage est détecté mais que la confiance est >= 95.0, on ne fait rien (pas de print, pas de MQTT).
+        # Le script continue de boucler.
 
     # no face recognized -> publish False after cooldown (si pas en repos)
+    # Note: La publication FALSE est basée sur l'absence de DÉTECTION VALIDE (<95.0)
     if not face_detected and (now - last_face > COOLDOWN) and last_state != False and detect_on:
         msg = {"authorization": False, "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
         client.publish(TOPIC_ROSTRO, json.dumps(msg))
@@ -259,11 +260,9 @@ def detect():
 if __name__ == "__main__":
     try:
         while True:
-            # detect() est appelé seulement si detect_on est True
             if detect_on:
                 detect()
             else:
-                # Repos forcé pour économiser le CPU/Caméra
                 time.sleep(0.5)
             
     except KeyboardInterrupt:
