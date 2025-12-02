@@ -4,6 +4,19 @@ import paho.mqtt.client as mqtt
 import time, json, pickle, threading
 from datetime import datetime
 import os
+from dotenv import load_dotenv
+from influxdb_client import InfluxDBClient, Point
+from influxdb_client.client.write_api import SYNCHRONOUS
+
+load_dotenv() 
+
+INFLUX_URL = os.getenv("INFLUX_URL")
+INFLUX_TOKEN = os.getenv("INFLUX_TOKEN")
+INFLUX_ORG = os.getenv("INFLUX_ORG")
+INFLUX_BUCKET = os.getenv("INFLUX_BUCKET")
+
+client_influx = InfluxDBClient(url=INFLUX_URL, token=INFLUX_TOKEN, org=INFLUX_ORG)
+write_api = client_influx.write_api(write_options=SYNCHRONOUS)
 
 # ===================== CONFIG MQTT =====================
 BROKER = "totox.local"
@@ -36,6 +49,18 @@ COOLDOWN = 2.0  # seconds
 MODEL_FILE = "face_model.yml"
 LABELS_FILE = "labels.pkl"
 
+def write_to_influx(measurement, tags, fields):
+    try:
+        p = Point(measurement)
+        for key, value in tags.items():
+            p.tag(key, value)
+        for key, value in fields.items():
+            p.field(key, value)
+            
+        write_api.write(bucket=INFLUX_BUCKET, org=INFLUX_ORG, record=p)
+    except Exception as e:
+        print(f"[INFLUX] Error writing: {e}")
+
 # ===================== MODEL LOADING =====================
 if not os.path.exists(MODEL_FILE) or not os.path.exists(LABELS_FILE):
     raise FileNotFoundError("Model or labels are missing. Run encode_faces.py first.")
@@ -64,6 +89,13 @@ def on_message(client, userdata, msg):
     try:
         data = json.loads(msg.payload.decode())
         print("[MQTT] distancia payload:", data)
+        dist_val = data.get("distancia_cm")
+        if dist_val is not None:
+            write_to_influx(
+                measurement="mqtt_logs",
+                tags={"topic": msg.topic, "direction": "incoming"},
+                fields={"distancia_cm": float(dist_val)}
+            )
         # keep original behavior for enabling detection based on distance
         new_detect = data.get("distancia_cm", 9999) < LIMITE
         detect_on = new_detect
@@ -78,6 +110,11 @@ def on_message(client, userdata, msg):
                 client.publish(TOPIC_LED, json.dumps(led_msg))
                 led_last_state = True
                 print(f"[MQTT] LED -> {led_msg} on {TOPIC_LED}")
+                write_to_influx(
+                    measurement="mqtt_logs",
+                    tags={"topic": TOPIC_LED, "direction": "outgoing"},
+                    fields={"led_status": True}
+                )
             except Exception as e:
                 print("[MQTT] error publishing LED ON:", e)
     except Exception as e:
