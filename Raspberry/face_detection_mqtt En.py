@@ -109,6 +109,11 @@ def on_message(client, userdata, msg):
                 client.publish(TOPIC_LED, json.dumps(led_msg))
                 previous_led_state = True
                 print(f"[MQTT] LED -> {led_msg} on {TOPIC_LED}")
+                write_to_influx(
+                    measurement="mqtt_logs",
+                    tags={"topic": TOPIC_LED, "direction": "outgoing"},
+                    fields={"led_status": True}
+                )
         except Exception as e:
             print("[MQTT] error publishing LED:", e)
     except Exception as e:
