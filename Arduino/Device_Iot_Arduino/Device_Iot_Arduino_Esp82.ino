@@ -1,7 +1,6 @@
-#include <Arduino.h>
-#include <WiFi.h>
+#include <ESP8266WiFi.h>
 #include <ArduinoJson.h>
-#include <WiFiClientSecure.h>
+#include <WiFiClientSecureBearSSL.h>
 #include <PubSubClient.h>
 #include "time.h" // Para sincronización NTP
 
@@ -109,17 +108,34 @@ const char* client_key = \
 
 // ===================== OBJETOS GLOBALES =====================
 
-WiFiClientSecure espClient;
+// Usar BearSSL para ESP8266
+BearSSL::WiFiClientSecure espClient;
 PubSubClient client(espClient);
 
+// Estructuras estáticas necesarias para BearSSL (deben tener vida estática)
+static BearSSL::X509List caList(ca_cert);
+static BearSSL::X509List clientCertList(client_cert);
+static BearSSL::PrivateKey clientKey(client_key);
 
-// ===================== PINES =====================
+
+// ===================== PINES Esp32 Dev kit =====================
+/*
 const int ledGreen   = 2;   // LED ok (GPIO 2)
 const int ledRed     = 4;   // LED deny (GPIO 4)
 const int trigPin    = 5;   // Trigger del sensor ultrasónico (GPIO 5)
 const int echoPin    = 18;  // Echo del sensor ultrasónico (GPIO 18)
 const int relayPin   = 14;  // Pin para controlar el relay (GPIO 14)
 const int buzzerPin  = 15;  // Buzzer (GPIO 15)
+*/
+
+// ===================== PINES  NodeMCU (ESP8266) =====================
+
+const int ledGreen = 4; // GPIO4 (D2) - LED externa sugerida
+const int ledRed = 2;   // LED integrado (GPIO2, D4) - nota: activo-LOW
+const int trigPin = 5;   // Trigger (D1)
+const int echoPin = 13;  // Echo (D7)
+const int relayPin = 14; // Relay (D5)
+const int buzzerPin = 15; // Buzzer (D8)
 
 // ===================== FUNCIONES =====================
 
@@ -198,12 +214,80 @@ void callback(char* topic, byte* payload, unsigned int length) {
 void reconnect() {
   while (!client.connected()) {
     Serial.print("Connecting MQTT...");
-    if (client.connect("ESP32S3Client")) {
+
+    // Resolver nombre a IP localmente para evitar problemas de mDNS/DNS
+    IPAddress mqtt_ip;
+    bool resolved = WiFi.hostByName(mqtt_server, mqtt_ip);
+    if (resolved) {
+      Serial.print("Resolved "); Serial.print(mqtt_server); Serial.print(" -> "); Serial.println(mqtt_ip);
+      client.setServer(mqtt_ip, mqtt_port);
+    } else {
+      Serial.print("No se pudo resolver "); Serial.println(mqtt_server);
+      // mantener el nombre; el intento de conexión puede fallar por DNS
+      client.setServer(mqtt_server, mqtt_port);
+    }
+
+    // Probar conexión TLS simple para ver si el socket TLS se puede abrir
+      Serial.print("Probing TLS socket...");
+      // Reportar memoria libre para detectar problemas al cargar certificados
+      Serial.print(" freeHeap="); Serial.println(ESP.getFreeHeap());
+
+      // Si resolvió, usar la IP para la conexión TCP, pero fijar SNI con el nombre
+      const char* probeHost = mqtt_server;
+      String mqtt_ip_str = "";
+      if (resolved) {
+        mqtt_ip_str = mqtt_ip.toString();
+        probeHost = mqtt_ip_str.c_str();
+      }
+
+      // Intentar conexión TLS por nombre (asegura SNI cuando el broker lo requiera)
+      if (espClient.connect(mqtt_server, mqtt_port)) {
+        Serial.println("OK (socket TLS conectado usando nombre)");
+        espClient.stop();
+      } else {
+        Serial.println("Fallo (socket TLS usando nombre)");
+
+        // Si resolvimos la IP, probar conectar por IP como diagnóstico (no usa SNI)
+        if (resolved) {
+          Serial.print("Probar conexión por IP "); Serial.print(mqtt_ip); Serial.println(" ...");
+          if (espClient.connect(mqtt_ip, mqtt_port)) {
+            Serial.println("OK (socket TLS conectado usando IP)");
+            espClient.stop();
+          } else {
+            Serial.println("Fallo (socket TLS usando IP)");
+          }
+        }
+
+        // Diagnóstico adicional: intentar conexión TLS ignorando verificación de certificado
+        Serial.print("Trying insecure TLS (diagnostic)...");
+        espClient.setInsecure();
+        if (espClient.connect(mqtt_server, mqtt_port)) {
+          Serial.println("OK (insecure TLS conectado) -- indica problema con CA o SNI");
+          espClient.stop();
+        } else if (resolved && espClient.connect(mqtt_ip, mqtt_port)) {
+          Serial.println("OK (insecure TLS conectado usando IP)");
+          espClient.stop();
+        } else {
+          Serial.println("Fallo (insecure TLS)");
+        }
+        // Nota: no retornamos aquí; seguimos con intento MQTT para capturar rc
+      }
+
+    // Usar un clientId único basado en chip id
+    String clientId = "NodeMCU-" + String(ESP.getChipId());
+    Serial.print("ClientId: "); Serial.println(clientId);
+
+    if (client.connect(clientId.c_str())) {
       client.subscribe(topic_rostro);
       Serial.println("Subscribed to sensor/rostro");
     } else {
+      int8_t st = client.state();
       Serial.print("Fail, rc=");
-      Serial.println(client.state());
+      Serial.println(st);
+      // Interpretación rápida de códigos comunes
+      if (st == -2) Serial.println("MQTT_CONNECT_FAILED: fallo en el handshake/connect TCP/TLS o rechazo del broker");
+      if (st == -3) Serial.println("MQTT_CONNECTION_LOST: conexión perdida");
+      if (st == -4) Serial.println("MQTT_CONNECTION_TIMEOUT: tiempo de conexión agotado");
       delay(4000);
     }
   }
@@ -274,9 +358,9 @@ void setup() {
   setup_wifi();
   syncTime();
 
-  espClient.setCACert(ca_cert);
-  espClient.setCertificate(client_cert);
-  espClient.setPrivateKey(client_key);
+  // Configurar certificados y llave en BearSSL (ESP8266)
+  espClient.setTrustAnchors(&caList);
+  espClient.setClientRSACert(&clientCertList, &clientKey);
 
   client.setServer(mqtt_server, mqtt_port);
   client.setCallback(callback);
