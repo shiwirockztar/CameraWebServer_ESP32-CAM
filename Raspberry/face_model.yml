@@ -14437,6 +14437,6 @@ opencv_lbphfaces:
       rows: 6
       cols: 1
       dt: i
-      data: [ 1, 1, 1, 1, 1, 1 ]
+      data: [ 0, 0, 0, 0, 0, 0 ]
    labelsInfo:
       []

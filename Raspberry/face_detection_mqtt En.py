@@ -1,4 +1,4 @@
-# face_detection_mqtt.py
+# face_detection_production_headless_debug.py
 import cv2
 import paho.mqtt.client as mqtt
 import time, json, pickle, threading
@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 
+# --- CONFIGURATION INFLUXDB ---
 load_dotenv() 
 
 INFLUX_URL = os.getenv("INFLUX_URL")
@@ -28,8 +29,8 @@ CA = "ca.crt"
 CERT = "server.crt"
 KEY = "server.key"
 
-# ===================== VARIABLES =====================
-URL = "http://10.42.0.202:81/stream"  # adapte
+# ===================== VARIABLES GLOBALES =====================
+URL = "http://10.42.0.202:81/stream"
 cap = None
 detect_on = False
 LIMITE = 7  # cm
@@ -39,16 +40,15 @@ last_distancia_time = 0.0
 led_last_state = False
 DIST_TIMEOUT = 3.0  # seconds without messages -> LED off
 
-# previous state to detect changes and publish commands to the Arduino
-previous_detect_state = False
-
-last_face = 0
+# Variables de détection
+last_face = 0.0 # Sera initialisé à time.time() après l'ouverture de la caméra
 last_state = None
 COOLDOWN = 2.0  # seconds
 
 MODEL_FILE = "face_model.yml"
 LABELS_FILE = "labels.pkl"
 
+# --- FONCTION INFLUXDB ---
 def write_to_influx(measurement, tags, fields):
     try:
         p = Point(measurement)
@@ -65,7 +65,6 @@ def write_to_influx(measurement, tags, fields):
 if not os.path.exists(MODEL_FILE) or not os.path.exists(LABELS_FILE):
     raise FileNotFoundError("Model or labels are missing. Run encode_faces.py first.")
 
-# load label map (name -> int), we reverse it for int->name
 with open(LABELS_FILE, "rb") as f:
     name_to_label = pickle.load(f)
 label_to_name = {v:k for k,v in name_to_label.items()}
@@ -73,10 +72,9 @@ label_to_name = {v:k for k,v in name_to_label.items()}
 recognizer = cv2.face.LBPHFaceRecognizer_create()
 recognizer.read(MODEL_FILE)
 
-# Loading the cascade for face detection
 cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
 
-# ===================== MQTT =====================
+# ===================== MQTT CALLBACKS & WATCHDOG =====================
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
         client.subscribe(TOPIC_DISTANCIA)
@@ -90,26 +88,28 @@ def on_message(client, userdata, msg):
         data = json.loads(msg.payload.decode())
         print("[MQTT] distancia payload:", data)
         dist_val = data.get("distancia_cm")
+        
+        # LOG INFLUXDB (Distance)
         if dist_val is not None:
             write_to_influx(
                 measurement="mqtt_logs",
                 tags={"topic": msg.topic, "direction": "incoming"},
                 fields={"distancia_cm": float(dist_val)}
             )
-        # keep original behavior for enabling detection based on distance
+            
         new_detect = data.get("distancia_cm", 9999) < LIMITE
         detect_on = new_detect
 
-        # Update last received time for the distance topic
         last_distancia_time = time.time()
 
-        # Immediately publish LED ON when a distance message arrives
+        # Publication LED ON
         if not led_last_state:
             try:
                 led_msg = {"led": True}
                 client.publish(TOPIC_LED, json.dumps(led_msg))
                 led_last_state = True
                 print(f"[MQTT] LED -> {led_msg} on {TOPIC_LED}")
+                # LOG INFLUXDB (LED ON)
                 write_to_influx(
                     measurement="mqtt_logs",
                     tags={"topic": TOPIC_LED, "direction": "outgoing"},
@@ -131,19 +131,24 @@ except Exception as e:
 client.connect(BROKER, PORT, 60)
 client.loop_start()
 
-# Start a background watcher that publishes LED OFF if no distancia messages arrive
+# Watchdog Thread
 def distancia_watcher():
     global last_distancia_time, led_last_state
     while True:
         try:
             now = time.time()
-            # if we previously set LED on and timeout expired -> publish off
             if led_last_state and (now - last_distancia_time) > DIST_TIMEOUT:
                 try:
                     led_msg = {"led": False}
                     client.publish(TOPIC_LED, json.dumps(led_msg))
                     led_last_state = False
                     print(f"[WATCHER] No distancia msg for {DIST_TIMEOUT}s, published {led_msg} on {TOPIC_LED}")
+                    # LOG INFLUXDB (LED OFF)
+                    write_to_influx(
+                        measurement="mqtt_logs",
+                        tags={"topic": TOPIC_LED, "direction": "outgoing"},
+                        fields={"led_status": False}
+                    )
                 except Exception as e:
                     print("[WATCHER] error publishing LED OFF:", e)
         except Exception as e:
@@ -156,43 +161,49 @@ watcher_thread.start()
 # ===================== FACE DETECTION AND RECOGNITION =====================
 def detect():
     global cap, last_face, last_state
+    
+    # Initialisation de la caméra (CORRIGÉE : initialisation du chronomètre)
     if cap is None:
         cap = cv2.VideoCapture(URL)
         if not cap.isOpened():
             print("[ERROR] Unable to open the video stream")
             return
+        else:
+            global last_face
+            last_face = time.time() # CORRECTION: Initialise le chronomètre ici
+            print("[INFO] Stream opened and detection loop initiated.")
 
     ret, frame = cap.read()
     if not ret:
         return
 
-    # rotation if needed
-    try:
-        frame = cv2.rotate(frame, cv2.ROTATE_180)
-    except Exception:
-        pass
-
+    # Le code de rotation a été retiré, nous continuons directement.
+    
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     detected = cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(50,50))
     now = time.time()
     face_detected = False
 
     for (x,y,w,h) in detected:
-        # ignore very small faces
-        if w < 30 or h < 30:
-            continue
+        if w < 30 or h < 30: continue
 
         face_roi = gray[y:y+h, x:x+w]
+        if face_roi.size == 0: continue
         face_resized = cv2.resize(face_roi, (200,200))
 
         # predict
         label, confidence = recognizer.predict(face_resized)
-        # LBPH: lower confidence = better match. Adjust the threshold according to tests (e.g., 50..80)
         THRESH = 110.0
         name = "Unknown"
+        
         if confidence <= THRESH and label in label_to_name:
             name = label_to_name[label]
             face_detected = True
+            
+            # DEBUG : Impression directe dans la console
+            print(f"[DEBUG] Visage détecté : {name} | Confiance: {int(confidence)}")
+
+            # PUBLICATION TRUE
             if last_state != True:
                 msg = {
                     "authorization": True,
@@ -201,53 +212,36 @@ def detect():
                     "confidence": float(confidence)
                 }
                 client.publish(TOPIC_ROSTRO, json.dumps(msg))
+                print(f"[MQTT] Autorisation TRUE publiée pour {name}")
                 last_state = True
-        # draw
-        try:
-            cv2.rectangle(frame, (x,y), (x+w, y+h), (0,255,0) if name!="Unknown" else (0,0,255), 2)
-            cv2.putText(frame, f"{name} ({int(confidence)})", (x, y-10),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,255,0) if name!="Unknown" else (0,0,255), 2)
-        except Exception:
-            pass
+        else:
+             # DEBUG : Impression directe dans la console pour visage non reconnu
+             print(f"[DEBUG] Visage détecté : UNKNOWN | Confiance: {int(confidence)}")
 
     # no face recognized -> publish False after cooldown
     if not face_detected and (now - last_face > COOLDOWN) and last_state != False:
         msg = {"authorization": False, "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
         client.publish(TOPIC_ROSTRO, json.dumps(msg))
+        print("[MQTT] Autorisation FALSE publiée.")
         last_state = False
 
     if face_detected:
         last_face = now
 
-    # display (if there's no Qt backend, we ignore the error and continue headless)
+# ===================== LOOP D'EXÉCUTION =====================
+if __name__ == "__main__":
     try:
-        cv2.imshow("Cam", frame)
-    except cv2.error as e:
-        # no GUI available (Wayland/Qt) -> we ignore it
+        while True:
+            if detect_on:
+                detect()
+            else:
+                time.sleep(0.5)
+            
+    except KeyboardInterrupt:
         pass
-
-# ===================== LOOP =====================
-try:
-    while True:
-        if detect_on:
-            detect()
-        else:
-            time.sleep(0.5)
-        # keyboard management if GUI is available
-        try:
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
-        except Exception:
-            # no GUI -> we continue
-            pass
-except KeyboardInterrupt:
-    pass
-finally:
-    if cap:
-        cap.release()
-    try:
-        cv2.destroyAllWindows()
-    except Exception:
-        pass
-    client.loop_stop()
-    client.disconnect()
+    finally:
+        if cap:
+            cap.release()
+        client.loop_stop()
+        client.disconnect()
+        print("\nArrêt du script.")
