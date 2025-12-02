@@ -2,8 +2,21 @@
 import cv2
 import paho.mqtt.client as mqtt
 import time, json, pickle
+from dotenv import load_dotenv
 from datetime import datetime
+from influxdb_client import InfluxDBClient, Point
+from influxdb_client.client.write_api import SYNCHRONOUS
 import os
+
+load_dotenv() 
+
+INFLUX_URL = os.getenv("INFLUX_URL")
+INFLUX_TOKEN = os.getenv("INFLUX_TOKEN")
+INFLUX_ORG = os.getenv("INFLUX_ORG")
+INFLUX_BUCKET = os.getenv("INFLUX_BUCKET")
+
+client_influx = InfluxDBClient(url=INFLUX_URL, token=INFLUX_TOKEN, org=INFLUX_ORG)
+write_api = client_influx.write_api(write_options=SYNCHRONOUS)
 
 # ===================== CONFIG MQTT =====================
 BROKER = "totox.local"
@@ -36,6 +49,17 @@ COOLDOWN = 2.0  # seconds
 MODEL_FILE = "face_model.yml"
 LABELS_FILE = "labels.pkl"
 
+def write_to_influx(measurement, tags, fields):
+    try:
+        p = Point(measurement)
+        for key, value in tags.items():
+            p.tag(key, value)
+        for key, value in fields.items():
+            p.field(key, value)
+        write_api.write(bucket=INFLUX_BUCKET, org=INFLUX_ORG, record=p)
+    except Exception as e:
+        print(f"[INFLUX] Error writing: {e}")
+
 # ===================== MODEL LOADING =====================
 if not os.path.exists(MODEL_FILE) or not os.path.exists(LABELS_FILE):
     raise FileNotFoundError("Model or labels are missing. Run encode_faces.py first.")
@@ -64,6 +88,13 @@ def on_message(client, userdata, msg):
     try:
         data = json.loads(msg.payload.decode())
         print(data)
+        dist_val = data.get("distancia_cm")
+        if dist_val is not None:
+            write_to_influx(
+                measurement="mqtt_logs",
+                tags={"topic": msg.topic, "direction": "incoming"},
+                fields={"distancia_cm": float(dist_val)}
+            )
         # update detect_on as before (used for face detection loop)
         new_detect = data.get("distancia_cm", 9999) < LIMITE
         detect_on = new_detect
