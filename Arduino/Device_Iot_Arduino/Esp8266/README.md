@@ -34,7 +34,9 @@ Los siguientes pines aparecen en `Device_Iot_Arduino_Esp82.ino` como GPIO (núme
 
 Se añade la URL con una imagen del pinout de NodeMCU V3 para referencia visual:
 
-https://mischianti.org/wp-content/uploads/2021/10/NodeMcu-V3-CH340-Lua-ESP8266-pinout-mischianti-low-resolution.jpg
+<div align="center">
+	<img src="https://mischianti.org/wp-content/uploads/2021/10/NodeMcu-V3-CH340-Lua-ESP8266-pinout-mischianti-low-resolution.jpg" alt="NodeMCU V3 pinout" width="640" />
+</div>
 
 Usa esta imagen para verificar las etiquetas Dx ↔ GPIO cuando hagas el cableado.
 
@@ -91,9 +93,13 @@ He añadido un diagrama SVG con un esquema visual simple en este repositorio:
 - `wiring.svg` — diagrama visual del conexionado (NodeMCU, HC-SR04, relay, buzzer, LEDs)
 Puedes abrir `wiring.svg` desde tu editor o visualizarlo en un navegador.
 
-## Proyecto Fritzing (editable)
+**Vista previa del proyecto Fritzing (Breadboard)**
 
-He creado un esqueleto de proyecto Fritzing en `fritzing_project/` con archivos SVG y `meta.xml` para que puedas abrirlo y completar las piezas en Fritzing:
+![Breadboard preview](fritzing_project/breadboard.svg)
+
+Descargar proyecto Fritzing editable: [wiring.fzz](fritzing_project/wiring.fzz)
+
+## Proyecto Fritzing (editable)
 
 - `fritzing_project/meta.xml`
 - `fritzing_project/breadboard.svg`
@@ -108,4 +114,4 @@ Instrucciones para obtener un `.fzz` editable:
 3. Añade las partes reales desde la librería (NodeMCU, HC-SR04, relay, buzzer, LEDs) y conéctalas.
 4. Guarda el proyecto con `File -> Save As...` y elige `wiring.fzz`.
 
-Si quieres, puedo intentar empaquetar automáticamente estos archivos en un `.fzz` dentro del repositorio. ¿Lo hago (nota: será un ZIP con los SVGs y meta, puede necesitar ajustes con Fritzing para reconocer partes)?
+

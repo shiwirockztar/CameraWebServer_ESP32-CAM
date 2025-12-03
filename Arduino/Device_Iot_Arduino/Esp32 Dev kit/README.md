@@ -35,7 +35,9 @@ Los pines definidos en `Device_Iot_Arduino.ino` son (números GPIO del ESP32):
 
 Para referencia visual del mapeo de pines del ESP32 Dev Kit (verifica versión de tu placa antes de usar):
 
-https://mischianti.org/wp-content/uploads/2020/11/ESP32-DOIT-DEV-KIT-v1-pinout-mischianti.png
+<div align="center">
+	<img src="https://mischianti.org/wp-content/uploads/2020/11/ESP32-DOIT-DEV-KIT-v1-pinout-mischianti.png" alt="ESP32 DOIT DEV KIT v1 pinout" width="640" />
+</div>
 
 Usa esta referencia para confirmar las funciones y restricciones de los GPIOs en tu placa.
 
@@ -56,8 +58,7 @@ Recomendación: conecta primero en protoboard y mide señales antes de alimentar
 
 - Sketch: `Device_Iot_Arduino.ino` (ubicado en este directorio)
 
-Si quieres, puedo generar un diagrama SVG o un esquema Fritzing para esta configuración (igual que hice para el ESP8266). ¿Quieres que cree el `wiring.svg` y/o el esqueleto Fritzing para el ESP32? 
-He creado un `wiring.svg` con un esquema visual y un esqueleto de proyecto Fritzing en `fritzing_project/`:
+
 
 - `wiring.svg` — diagrama visual del conexionado (ESP32, HC-SR04, relay, buzzer, LEDs)
 - `fritzing_project/meta.xml`
@@ -66,6 +67,12 @@ He creado un `wiring.svg` con un esquema visual y un esqueleto de proyecto Fritz
 - `fritzing_project/pcb.svg`
 - `fritzing_project/parts/README.txt` (instrucciones)
 
+**Vista previa del proyecto Fritzing (Breadboard)**
+
+![Breadboard preview](fritzing_project/breadboard.svg)
+
+Descargar proyecto Fritzing editable: [wiring_esp32.fzz](fritzing_project/wiring_esp32.fzz)
+
 Instrucciones rápidas para obtener un `.fzz` editable:
 
 1. Abre Fritzing en tu máquina.
@@ -73,4 +80,4 @@ Instrucciones rápidas para obtener un `.fzz` editable:
 3. Añade las partes reales desde la librería (ESP32, HC-SR04, relay, buzzer, LEDs) y conéctalas.
 4. Guarda como `wiring_esp32.fzz` con `File -> Save As...`.
 
-Si quieres que empaquete estos archivos en un `wiring_esp32.fzz` automáticamente (ZIP con SVGs y meta), dímelo y lo creo en el repositorio (puede necesitar ajustar partes en Fritzing después).
+
