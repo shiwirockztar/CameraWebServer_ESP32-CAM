@@ -5,53 +5,58 @@ import pickle
 import os
 from config import MODEL_FILE, LABELS_FILE, RECOGNITION_THRESHOLD
 
-# --- INITIALISATION AU NIVEAU DU MODULE (PAS DE 'global' ICI) ---
+# --- INITIALISATION AU NIVEAU DU MODULE ---
 recognizer = None
 cascade = None
 label_to_name = {}
 
+# --- DÉFINITION DES CHEMINS ABSOLUS ---
+# Chemin du répertoire où se trouve ce script (face_recognizer.py)
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(SCRIPT_DIR, MODEL_FILE)
+LABELS_PATH = os.path.join(SCRIPT_DIR, LABELS_FILE)
+HAARCASCADE_PATH = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+
+
 # --- CHARGEMENT DU MODÈLE ---
 try:
-    if not os.path.exists(MODEL_FILE) or not os.path.exists(LABELS_FILE):
-        raise FileNotFoundError("Modèles faciaux manquants. Exécutez encode_faces.py.")
+    if not os.path.exists(MODEL_PATH):
+        raise FileNotFoundError(f"Modèle LBPH '{MODEL_PATH}' manquant.")
+    if not os.path.exists(LABELS_PATH):
+        raise FileNotFoundError(f"Fichier de labels '{LABELS_PATH}' manquant.")
 
     # Chargement des labels
-    with open(LABELS_FILE, "rb") as f:
+    with open(LABELS_PATH, "rb") as f: # Utiliser LABELS_PATH
         name_to_label = pickle.load(f)
     
-    # ASSIGNATION: Pylance ne voit plus d'avertissement ici
     label_to_name = {v: k for k, v in name_to_label.items()}
 
     # Chargement du recognizer
     recognizer = cv2.face.LBPHFaceRecognizer_create()
-    recognizer.read(MODEL_FILE)
+    recognizer.read(MODEL_PATH) # <-- Utiliser MODEL_PATH
 
     # Chargement du classificateur en cascade
-    cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+    cascade = cv2.CascadeClassifier(HAARCASCADE_PATH)
 
     print("[RECOGNIZER] Modèles de reconnaissance chargés.")
 
 except FileNotFoundError as e:
     print(f"[FATAL] {e}")
-    # Ne pas quitter ici, mais marquer les modèles comme non chargés pour les éviter plus tard
     recognizer = None
     cascade = None
     label_to_name = {}
     
 except Exception as e:
-    print(f"[FATAL] Erreur lors du chargement des modèles: {e}")
+    # Cette erreur est probablement ici si le chemin est correct.
+    print(f"[FATAL] Erreur lors du chargement des modèles (contenu invalide?): {e}")
+    print("Vérifiez l'intégrité du fichier face_model.yml.")
     recognizer = None
     cascade = None
     label_to_name = {}
 
 
 def process_frame(frame):
-    """
-    Détecte et reconnaît les visages dans une trame.
-    Les variables de module (recognizer, cascade, label_to_name) sont ACCESSIBLES sans 'global'.
-    Retourne une liste de résultats de détection valide.
-    """
-    # Pas besoin de 'global' car on ne réassigne pas les variables ici.
+    # ... (le reste de la fonction est inchangé) ...
     if cascade is None or recognizer is None:
         return []
 
