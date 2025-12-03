@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Schematic view SVG (skeleton) -->
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="420" viewBox="0 0 900 420">
+  <style>.label{font:13px sans-serif;fill:#111}</style>
+  <text x="20" y="30" class="label">Schematic view (skeleton). Replace with real Fritzing schematic or edit in Fritzing.</text>
+  <text x="20" y="60" class="label">D1 (GPIO5) - TRIG</text>
+  <text x="20" y="90" class="label">D7 (GPIO13) - ECHO (divisor)</text>
+  <text x="20" y="120" class="label">D5 (GPIO14) - Relay IN</text>
+  <text x="20" y="150" class="label">D8 (GPIO15) - Buzzer (transistor)</text>
+</svg>

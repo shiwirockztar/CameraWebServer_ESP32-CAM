@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Simple SVG wiring diagram for ESP32 Dev Kit and components used in Device_Iot_Arduino.ino -->
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="420" viewBox="0 0 900 420">
+  <style>
+    .node{fill:#f5f5f5;stroke:#333;stroke-width:2}
+    .pin{fill:#fff;stroke:#333;stroke-width:1}
+    .label{font:13px sans-serif;fill:#111}
+    .comp{fill:#fff;stroke:#2b7;stroke-width:1}
+    .wire{stroke:#0a58ca;stroke-width:2}
+    .warn{font:12px sans-serif;fill:#b21}
+  </style>
+
+  <!-- ESP32 block -->
+  <rect x="30" y="40" width="200" height="340" rx="8" class="node" />
+  <text x="130" y="62" text-anchor="middle" class="label">ESP32 Dev Kit</text>
+
+  <!-- Pins on ESP32 (simplified) -->
+  <circle cx="130" cy="110" r="8" class="pin" />
+  <text x="170" y="114" class="label">GPIO2 → LED Verde</text>
+
+  <circle cx="130" cy="150" r="8" class="pin" />
+  <text x="170" y="154" class="label">GPIO4 → LED Rojo</text>
+
+  <circle cx="130" cy="190" r="8" class="pin" />
+  <text x="170" y="194" class="label">GPIO5 → TRIG</text>
+
+  <circle cx="130" cy="230" r="8" class="pin" />
+  <text x="170" y="234" class="label">GPIO14 → Relay IN</text>
+
+  <circle cx="130" cy="270" r="8" class="pin" />
+  <text x="170" y="274" class="label">GPIO18 → ECHO (usar divisor si 5V)</text>
+
+  <circle cx="130" cy="310" r="8" class="pin" />
+  <text x="170" y="314" class="label">GPIO15 → Buzzer (via transistor)</text>
+
+  <!-- Power pins -->
+  <rect x="50" y="332" width="40" height="24" rx="4" fill="#ffe" stroke="#333" />
+  <text x="70" y="349" text-anchor="middle" class="label">3V3</text>
+  <rect x="110" y="332" width="60" height="24" rx="4" fill="#eee" stroke="#333" />
+  <text x="140" y="349" text-anchor="middle" class="label">GND</text>
+
+  <!-- HC-SR04 block -->
+  <rect x="360" y="80" width="180" height="110" rx="6" fill="#fff" stroke="#333" />
+  <text x="450" y="100" text-anchor="middle" class="label">HC-SR04</text>
+  <text x="450" y="122" class="label">Vcc (3.3/5V)</text>
+  <text x="450" y="140" class="label">TRIG</text>
+  <text x="450" y="158" class="label">ECHO</text>
+  <text x="450" y="176" class="label">GND</text>
+
+  <!-- Relay block -->
+  <rect x="360" y="210" width="160" height="80" rx="6" fill="#fff" stroke="#333" />
+  <text x="440" y="230" text-anchor="middle" class="label">Relay Module</text>
+  <text x="440" y="248" class="label">Vcc</text>
+  <text x="440" y="266" class="label">IN (GPIO14)</text>
+  <text x="440" y="284" class="label">GND</text>
+
+  <!-- Buzzer block -->
+  <rect x="660" y="200" width="200" height="80" rx="6" fill="#fff" stroke="#333" />
+  <text x="760" y="224" text-anchor="middle" class="label">Buzzer</text>
+  <text x="760" y="244" class="label">IN (GPIO15) via transistor</text>
+  <text x="760" y="264" class="label">GND</text>
+
+  <!-- Wires -->
+  <line x1="138" y1="190" x2="360" y2="140" class="wire" />
+  <circle cx="360" cy="140" r="3" fill="#0a58ca" />
+
+  <line x1="138" y1="270" x2="380" y2="158" class="wire" />
+  <circle cx="380" cy="158" r="3" fill="#0a58ca" />
+  <rect x="400" y="140" width="14" height="8" fill="#ccc" stroke="#333" />
+  <text x="420" y="148" class="label">10k</text>
+  <rect x="400" y="154" width="14" height="8" fill="#ccc" stroke="#333" />
+  <text x="420" y="162" class="label">20k</text>
+
+  <line x1="138" y1="230" x2="360" y2="248" class="wire" />
+  <circle cx="360" cy="248" r="3" fill="#0a58ca" />
+
+  <line x1="138" y1="310" x2="660" y2="244" class="wire" />
+  <circle cx="660" cy="244" r="3" fill="#0a58ca" />
+
+  <line x1="138" y1="110" x2="520" y2="100" class="wire" />
+  <circle cx="520" cy="100" r="4" fill="#0f0" stroke="#333" />
+
+  <line x1="138" y1="150" x2="520" y2="132" class="wire" stroke-dasharray="4 4" />
+  <circle cx="520" cy="132" r="4" fill="#f00" stroke="#333" />
+
+  <line x1="80" y1="342" x2="360" y2="186" stroke="#333" stroke-width="1" />
+  <text x="380" y="188" class="label">GND (compartido)</text>
+  <line x1="60" y1="342" x2="360" y2="100" stroke="#333" stroke-width="1" />
+  <text x="380" y="100" class="label">3V3 (alimentación opcional)</text>
+
+  <text x="20" y="390" class="warn">Nota: usar transistor/divisor de nivel para proteger GPIO; no alimentar relé directamente desde GPIO.</text>
+
+</svg>

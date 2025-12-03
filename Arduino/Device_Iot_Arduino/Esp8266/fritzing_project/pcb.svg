@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- PCB view SVG (skeleton) -->
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="420" viewBox="0 0 900 420">
+  <style>.label{font:13px sans-serif;fill:#111}</style>
+  <text x="20" y="30" class="label">PCB view (skeleton). Edit in Fritzing to add real PCB footprints and traces.</text>
+</svg>

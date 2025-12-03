@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Simple SVG wiring diagram for NodeMCU (ESP8266) and components used in Device_Iot_Arduino_Esp82.ino -->
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="420" viewBox="0 0 900 420">
+  <style>
+    .node{fill:#f5f5f5;stroke:#333;stroke-width:2}
+    .pin{fill:#fff;stroke:#333;stroke-width:1}
+    .label{font:13px sans-serif;fill:#111}
+    .comp{fill:#fff;stroke:#2b7;stroke-width:1}
+    .wire{stroke:#0a58ca;stroke-width:2}
+    .warn{font:12px sans-serif;fill:#b21}
+  </style>
+
+  <!-- NodeMCU block -->
+  <rect x="30" y="40" width="180" height="340" rx="8" class="node" />
+  <text x="120" y="62" text-anchor="middle" class="label">NodeMCU (ESP8266)</text>
+
+  <!-- Pins on NodeMCU (simplified) -->
+  <!-- D1 (GPIO5) -->
+  <circle cx="120" cy="110" r="8" class="pin" />
+  <text x="150" y="114" class="label">D1 (GPIO5) → TRIG</text>
+
+  <!-- D2 (GPIO4) -->
+  <circle cx="120" cy="150" r="8" class="pin" />
+  <text x="150" y="154" class="label">D2 (GPIO4) → LED verde</text>
+
+  <!-- D4 (GPIO2) -->
+  <circle cx="120" cy="190" r="8" class="pin" />
+  <text x="150" y="194" class="label">D4 (GPIO2) → LED rojo (integrado)</text>
+
+  <!-- D5 (GPIO14) -->
+  <circle cx="120" cy="230" r="8" class="pin" />
+  <text x="150" y="234" class="label">D5 (GPIO14) → Relay IN</text>
+
+  <!-- D7 (GPIO13) -->
+  <circle cx="120" cy="270" r="8" class="pin" />
+  <text x="150" y="274" class="label">D7 (GPIO13) ← ECHO (usar divisor)</text>
+
+  <!-- D8 (GPIO15) -->
+  <circle cx="120" cy="310" r="8" class="pin" />
+  <text x="150" y="314" class="label">D8 (GPIO15) → Buzzer</text>
+
+  <!-- 3V3 and GND -->
+  <rect x="40" y="330" width="40" height="24" rx="4" fill="#ffe" stroke="#333" />
+  <text x="60" y="347" text-anchor="middle" class="label">3V3</text>
+  <rect x="100" y="330" width="60" height="24" rx="4" fill="#eee" stroke="#333" />
+  <text x="130" y="347" text-anchor="middle" class="label">GND</text>
+
+  <!-- HC-SR04 block -->
+  <rect x="340" y="80" width="180" height="110" rx="6" fill="#fff" stroke="#333" />
+  <text x="430" y="100" text-anchor="middle" class="label">HC-SR04</text>
+  <text x="430" y="122" class="label">Vcc (3.3/5V)</text>
+  <text x="430" y="140" class="label">TRIG</text>
+  <text x="430" y="158" class="label">ECHO</text>
+  <text x="430" y="176" class="label">GND</text>
+
+  <!-- Relay block -->
+  <rect x="340" y="210" width="160" height="80" rx="6" fill="#fff" stroke="#333" />
+  <text x="420" y="230" text-anchor="middle" class="label">Relay Module</text>
+  <text x="420" y="248" class="label">Vcc</text>
+  <text x="420" y="266" class="label">IN (D5)</text>
+  <text x="420" y="284" class="label">GND</text>
+
+  <!-- Buzzer block -->
+  <rect x="640" y="200" width="200" height="80" rx="6" fill="#fff" stroke="#333" />
+  <text x="740" y="224" text-anchor="middle" class="label">Buzzer</text>
+  <text x="740" y="244" class="label">IN (D8) via transistor</text>
+  <text x="740" y="264" class="label">GND</text>
+
+  <!-- Wires -->
+  <!-- D1 -> TRIG -->
+  <line x1="128" y1="110" x2="340" y2="140" class="wire" />
+  <circle cx="340" cy="140" r="3" fill="#0a58ca" />
+
+  <!-- D7 <- ECHO (with resistor divider shown) -->
+  <line x1="128" y1="270" x2="380" y2="158" class="wire" />
+  <circle cx="380" cy="158" r="3" fill="#0a58ca" />
+  <!-- Resistor divider near echo -->
+  <rect x="400" y="140" width="14" height="8" fill="#ccc" stroke="#333" />
+  <text x="420" y="148" class="label">10k</text>
+  <rect x="400" y="154" width="14" height="8" fill="#ccc" stroke="#333" />
+  <text x="420" y="162" class="label">20k</text>
+
+  <!-- D2 -> LED verde -->
+  <line x1="128" y1="150" x2="520" y2="100" class="wire" />
+  <circle cx="520" cy="100" r="4" fill="#0f0" stroke="#333" />
+  <text x="540" y="104" class="label">LED Verde (con 220Ω)</text>
+
+  <!-- D4 integrated LED (note) -->
+  <line x1="128" y1="190" x2="520" y2="132" class="wire" stroke-dasharray="4 4" />
+  <circle cx="520" cy="132" r="4" fill="#f00" stroke="#333" />
+  <text x="540" y="136" class="label">LED Rojo integrado (activo LOW)</text>
+
+  <!-- D5 -> Relay IN -->
+  <line x1="128" y1="230" x2="340" y2="248" class="wire" />
+  <circle cx="340" cy="248" r="3" fill="#0a58ca" />
+
+  <!-- D8 -> Buzzer (via transistor) -->
+  <line x1="128" y1="310" x2="640" y2="244" class="wire" />
+  <circle cx="640" cy="244" r="3" fill="#0a58ca" />
+
+  <!-- GND and 3V3 connections visually -->
+  <line x1="100" y1="342" x2="340" y2="186" stroke="#333" stroke-width="1" />
+  <text x="360" y="188" class="label">GND (compartido)</text>
+  <line x1="60" y1="342" x2="360" y2="100" stroke="#333" stroke-width="1" />
+  <text x="380" y="100" class="label">3V3 (alimentación opcional)</text>
+
+  <!-- Warnings / Notes -->
+  <text x="20" y="390" class="warn">Nota: usar transistor/divisor de nivel para proteger GPIO; no alimentar relé directamente desde GPIO.</text>
+
+</svg>
