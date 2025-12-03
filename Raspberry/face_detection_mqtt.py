@@ -197,7 +197,7 @@ def detect():
     detected = cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(50,50))
     now = time.time()
     face_detected = False
-    print(face_detected)
+
     for (x,y,w,h) in detected:
         if w < 30 or h < 30: continue
 
