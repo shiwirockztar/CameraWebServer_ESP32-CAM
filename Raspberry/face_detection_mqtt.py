@@ -33,7 +33,7 @@ KEY = "server.key"
 URL = "http://10.42.0.202:81/stream"
 cap = None
 detect_on = False
-LIMITE = 7  # cm
+LIMITE = 50  # cm
 
 # Distance topic watchdog: track last received time and LED state
 last_distancia_time = 0.0
