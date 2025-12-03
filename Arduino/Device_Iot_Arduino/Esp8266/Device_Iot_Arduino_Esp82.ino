@@ -189,9 +189,10 @@ void callback(char* topic, byte* payload, unsigned int length) {
   StaticJsonDocument<256> doc;
   deserializeJson(doc, message);
 
-  bool autorizacion = doc["autorizacion"];
+  bool autorizacion = doc["authorization"];
   String hora = doc["hora"] | "inconnue";
 
+  
   if (autorizacion) {
     digitalWrite(ledGreen, HIGH);
     digitalWrite(ledRed, LOW);
@@ -375,5 +376,5 @@ void loop() {
   float distancia = medirDistancia();
   publicarDeteccion(distancia);
 
-  delay(5000); // Espera entre mediciones
+  delay(500); // Espera entre mediciones
 }
