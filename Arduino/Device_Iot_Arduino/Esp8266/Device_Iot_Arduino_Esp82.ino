@@ -322,7 +322,7 @@ void publicarDeteccion(float distancia) {
     // No publicar si la distancia es mayor a 50 cm
     return;
   }
-  doc["evento"] = "persona_detectada";
+  doc["evento"] = "Object_detected";
   doc["distancia_cm"] = distancia;
   doc["timestamp"] = obtenerHora();
 
