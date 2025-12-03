@@ -2,7 +2,8 @@
 import cv2
 import paho.mqtt.client as mqtt
 import time, json, pickle, threading
-from datetime import datetime
+import pytz
+from datetime import datetime, timezone
 import os
 from dotenv import load_dotenv
 from influxdb_client import InfluxDBClient, Point
@@ -18,6 +19,8 @@ INFLUX_BUCKET = os.getenv("INFLUX_BUCKET")
 
 client_influx = InfluxDBClient(url=INFLUX_URL, token=INFLUX_TOKEN, org=INFLUX_ORG)
 write_api = client_influx.write_api(write_options=SYNCHRONOUS)
+
+CO_TZ = pytz.timezone('America/Bogota')
 
 # ===================== CONFIG MQTT =====================
 BROKER = "totox.local"
@@ -225,13 +228,14 @@ def detect():
             # --- LOGIQUE D'AUTORISATION ET DE REPOS ---
             if last_state != True:
                 msg = {
+                    "camera": "camera1",
                     "authorization": True,
-                    "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "time": datetime.now(CO_TZ).strftime("%Y-%m-%d %H:%M:%S"),
                     "name": name,
                     "confidence": float(confidence)
                 }
                 client.publish(TOPIC_ROSTRO, json.dumps(msg))
-                print(f"[MQTT] Autorisation TRUE publiée pour {name}. Démarrage du repos de {REARM_COOLDOWN}s.")
+                print(f"[MQTT] Autorisation TRUE publiée {msg}. Démarrage du repos de {REARM_COOLDOWN}s.")
                 last_state = True
                 
                 # 1. DÉSACVITER LA DÉTECTION IMMÉDIATEMENT
