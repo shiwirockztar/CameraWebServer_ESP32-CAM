@@ -210,8 +210,9 @@ def detect():
         
         # **** NOUVEAU SEUIL DE DÉCLENCHEMENT/AFFICHAGE ****
         THRESH = 95.0 
-        print(f"[DEBUG] Visage détecté : {name} | Confiance: {int(confidence)})")
         name = "Unknown"
+        print(f"[DEBUG] Visage détecté : {name} | Confiance: {int(confidence)})")
+        
         
         # La condition est maintenant: La confiance doit être < 95.0
         if confidence < THRESH and label in label_to_name:
