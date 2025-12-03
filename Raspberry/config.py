@@ -40,7 +40,7 @@ REARM_COOLDOWN = 5.0
 COOLDOWN_FALSE = 2.0  
 
 # Seuil de confiance pour la reconnaissance faciale (inférieur à ce chiffre est une bonne reconnaissance)
-RECOGNITION_THRESHOLD = 95.0
+RECOGNITION_THRESHOLD = 75.0
 
 # --- FICHIERS MODÈLES ---
 MODEL_FILE = "face_model.yml"
