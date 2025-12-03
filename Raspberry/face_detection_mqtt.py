@@ -1,9 +1,9 @@
-# face_detection_production_headless_cooldown_v3_modified.py
+# face_detection_production_headless_cooldown_v3.py
 import cv2
 import paho.mqtt.client as mqtt
 import time, json, pickle, threading
 import pytz
-from datetime import datetime
+from datetime import datetime, timezone
 import os
 from dotenv import load_dotenv
 from influxdb_client import InfluxDBClient, Point
@@ -38,18 +38,16 @@ cap = None
 detect_on = False
 LIMITE = 50  # cm
 
-# Nouvelle variable de délai d'extinction de la LED (en secondes)
-LED_OFF_DELAY = 10.0 # Délai avant d'éteindre la LED après dépassement de LIMITE
-
-# Variables de contrôle de la LED et du temporisateur
+# Distance topic watchdog: track last received time and LED state
+last_distancia_time = 0.0
 led_last_state = False
-led_off_timer = None # Le temporisateur pour l'extinction
+DIST_TIMEOUT = 3.0  # seconds without messages -> LED off
 
 # Variables de détection
 last_face = 0.0 
 last_state = None
 COOLDOWN = 2.0  # seconds (cooldown après FALSE)
-REARM_COOLDOWN = 5.0 
+REARM_COOLDOWN = 5.0 # NOUVEAU: Cooldown après détection TRUE
 
 # État du temporisateur de réactivation
 rearm_timer = None 
@@ -91,26 +89,8 @@ def rearm_detection():
     detect_on = True
     print(f"[SYSTEM] Détection réactivée après {REARM_COOLDOWN}s de repos.")
 
-# ===================== FONCTION D'EXTINCTION DE LA LED =====================
-def turn_off_led():
-    """Éteint la LED et publie l'état via MQTT et InfluxDB."""
-    global led_last_state
-    if led_last_state:
-        try:
-            led_msg = {"led": False}
-            client.publish(TOPIC_LED, json.dumps(led_msg))
-            led_last_state = False
-            print(f"[LED CONTROL] LED -> {led_msg} on {TOPIC_LED} après délai.")
-            # LOG INFLUXDB (LED OFF)
-            write_to_influx(
-                measurement="mqtt_logs",
-                tags={"topic": TOPIC_LED, "direction": "outgoing"},
-                fields={"led_status": False}
-            )
-        except Exception as e:
-            print("[LED CONTROL] error publishing LED OFF:", e)
 
-# ===================== MQTT CALLBACKS =====================
+# ===================== MQTT CALLBACKS & WATCHDOG =====================
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
         client.subscribe(TOPIC_DISTANCIA)
@@ -119,7 +99,7 @@ def on_connect(client, userdata, flags, rc):
         print("[MQTT] rc:", rc)
 
 def on_message(client, userdata, msg):
-    global detect_on, led_last_state, rearm_timer, led_off_timer
+    global detect_on, last_distancia_time, led_last_state, rearm_timer
     try:
         data = json.loads(msg.payload.decode())
         print("[MQTT] distancia payload:", data)
@@ -133,49 +113,29 @@ def on_message(client, userdata, msg):
                 fields={"distancia_cm": float(dist_val)}
             )
             
-        is_close = data.get("distancia_cm", 9999) < LIMITE
+        new_detect = data.get("distancia_cm", 9999) < LIMITE
         
-        # ACTIVER/DÉSACTIVER LA DÉTECTION (Basé sur la distance et le temporisateur de réarmement)
+        # ACTIVER LA DETECTION SEULEMENT SI LE TEMPORISATEUR N'EST PAS ACTIF
         if rearm_timer is None or not rearm_timer.is_alive():
-            detect_on = is_close
-            
-        # -------------------- LOGIQUE DE CONTRÔLE DE LA LED --------------------
-        if is_close:
-            # 1. Si distance < LIMITE (Proche) : ALLUMER la LED
-            
-            # Annuler le temporisateur d'extinction s'il est actif
-            if led_off_timer and led_off_timer.is_alive():
-                led_off_timer.cancel()
-                led_off_timer = None
-                print("[LED CONTROL] Temporisateur d'extinction annulé (objet revenu).")
-                
-            # Allumer la LED (si elle n'est pas déjà ON)
-            if not led_last_state:
-                try:
-                    led_msg = {"led": True}
-                    client.publish(TOPIC_LED, json.dumps(led_msg))
-                    led_last_state = True
-                    print(f"[LED CONTROL] LED -> {led_msg} on {TOPIC_LED} (Proche).")
-                    # LOG INFLUXDB (LED ON)
-                    write_to_influx(
-                        measurement="mqtt_logs",
-                        tags={"topic": TOPIC_LED, "direction": "outgoing"},
-                        fields={"led_status": True}
-                    )
-                except Exception as e:
-                    print("[MQTT] error publishing LED ON:", e)
-                    
-        else:
-            # 2. Si distance >= LIMITE (Loin) : Démarrer le temporisateur d'extinction
-            
-            # Si la LED est allumée ET qu'aucun temporisateur d'extinction n'est actif
-            if led_last_state and (led_off_timer is None or not led_off_timer.is_alive()):
-                print(f"[LED CONTROL] Distance > LIMITE. Démarrage du temporisateur d'extinction de {LED_OFF_DELAY}s.")
-                led_off_timer = threading.Timer(LED_OFF_DELAY, turn_off_led)
-                led_off_timer.start()
-            
-            # Si la LED est déjà éteinte ou si le timer est déjà lancé, on ne fait rien.
-            
+            detect_on = new_detect
+
+        last_distancia_time = time.time()
+
+        # Publication LED ON
+        if not led_last_state:
+            try:
+                led_msg = {"led": True}
+                client.publish(TOPIC_LED, json.dumps(led_msg))
+                led_last_state = True
+                print(f"[MQTT] LED -> {led_msg} on {TOPIC_LED}")
+                # LOG INFLUXDB (LED ON)
+                write_to_influx(
+                    measurement="mqtt_logs",
+                    tags={"topic": TOPIC_LED, "direction": "outgoing"},
+                    fields={"led_status": True}
+                )
+            except Exception as e:
+                print("[MQTT] error publishing LED ON:", e)
     except Exception as e:
         print("[MQTT] error with message:", e)
 
@@ -190,14 +150,38 @@ except Exception as e:
 client.connect(BROKER, PORT, 60)
 client.loop_start()
 
-# # ===================== WATCHDOG THREAD RETIRÉ =====================
-# Le thread distancia_watcher est retiré car sa logique n'est plus pertinente.
+# Watchdog Thread (inchangé)
+def distancia_watcher():
+    global last_distancia_time, led_last_state
+    while True:
+        try:
+            now = time.time()
+            if led_last_state and (now - last_distancia_time) > DIST_TIMEOUT:
+                try:
+                    led_msg = {"led": False}
+                    client.publish(TOPIC_LED, json.dumps(led_msg))
+                    led_last_state = False
+                    print(f"[WATCHER] No distancia msg for {DIST_TIMEOUT}s, published {led_msg} on {TOPIC_LED}")
+                    # LOG INFLUXDB (LED OFF)
+                    write_to_influx(
+                        measurement="mqtt_logs",
+                        tags={"topic": TOPIC_LED, "direction": "outgoing"},
+                        fields={"led_status": False}
+                    )
+                except Exception as e:
+                    print("[WATCHER] error publishing LED OFF:", e)
+        except Exception as e:
+            print("[WATCHER] unexpected error:", e)
+        time.sleep(0.2)
+
+watcher_thread = threading.Thread(target=distancia_watcher, daemon=True)
+watcher_thread.start()
 
 # ===================== FACE DETECTION AND RECOGNITION =====================
 def detect():
     global cap, last_face, last_state, detect_on, rearm_timer
     
-    # Initialisation de la caméra 
+    # Initialisation de la caméra (CORRIGÉE : initialisation du chronomètre)
     if cap is None:
         cap = cv2.VideoCapture(URL)
         if not cap.isOpened():
@@ -205,7 +189,7 @@ def detect():
             return
         else:
             global last_face
-            last_face = time.time() 
+            last_face = time.time() # Initialise le chronomètre ici
             print("[INFO] Stream opened and detection loop initiated.")
 
     ret, frame = cap.read()
@@ -227,11 +211,12 @@ def detect():
         # predict
         label, confidence = recognizer.predict(face_resized)
         
-        # **** SEUIL DE DÉCLENCHEMENT/AFFICHAGE ****
+        # **** NOUVEAU SEUIL DE DÉCLENCHEMENT/AFFICHAGE ****
         THRESH = 95.0 
         name = "Unknown"
-        # Print de debug retiré pour une console moins verbeuse
-
+        print(f"[DEBUG] Visage détecté : {name} | Confiance: {int(confidence)})")
+        
+        
         # La condition est maintenant: La confiance doit être < 95.0
         if confidence < THRESH and label in label_to_name:
             name = label_to_name[label]
@@ -245,7 +230,6 @@ def detect():
                 msg = {
                     "camera": "camera1",
                     "authorization": True,
-                    # Utilisation de CO_TZ (Bogota)
                     "time": datetime.now(CO_TZ).strftime("%Y-%m-%d %H:%M:%S"),
                     "name": name,
                     "confidence": float(confidence)
@@ -268,19 +252,14 @@ def detect():
 
                 break 
         
-        # NOUVEAU: Si le visage est détecté mais que la confiance est >= 95.0, on ne fait rien.
+        # NOUVEAU: Si le visage est détecté mais que la confiance est >= 95.0, on ne fait rien (pas de print, pas de MQTT).
+        # Le script continue de boucler.
 
     # no face recognized -> publish False after cooldown (si pas en repos)
+    # Note: La publication FALSE est basée sur l'absence de DÉTECTION VALIDE (<95.0)
     if not face_detected and (now - last_face > COOLDOWN) and last_state != False and detect_on:
-        # NOTE : L'horodatage pour FALSE utilise datetime.now() par défaut ici. 
-        # Pour une cohérence totale, il faudrait aussi utiliser CO_TZ.
-        msg = {"authorization": False, "time": datetime.now(CO_TZ).strftime("%Y-%m-%d %H:%M:%S")}
+        msg = {"authorization": False, "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
         client.publish(TOPIC_ROSTRO, json.dumps(msg))
-        write_to_influx(
-            measurement="mqtt_logs",
-            tags={"topic": TOPIC_ROSTRO, "direction": "outgoing"},
-            fields={"authorization": 0}
-        )
         print("[MQTT] Autorisation FALSE publiée.")
         last_state = False
 
