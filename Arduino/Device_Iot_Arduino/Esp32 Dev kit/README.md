@@ -67,17 +67,35 @@ Recomendación: conecta primero en protoboard y mide señales antes de alimentar
 - `fritzing_project/pcb.svg`
 - `fritzing_project/parts/README.txt` (instrucciones)
 
-**Vista previa del proyecto Fritzing (Breadboard)**
+**Vista previa del proyecto Fritzing (breadboard)**
 
-![Breadboard preview](fritzing_project/breadboard.svg)
+![breadboard preview](fritzing_project/breadboard.svg)
 
 Descargar proyecto Fritzing editable: [wiring_esp32.fzz](fritzing_project/wiring_esp32.fzz)
 
-Instrucciones rápidas para obtener un `.fzz` editable:
+fritzing_project/
+│
+├── diagrama.fzz
+├── fritzing_parts/
+│     ├── my_parts.fzbz
+│     ├── 1 chan 5v relay module.fzpz
+│
+├── breadboard.svg
+├── breadboard.png
+└── README.md
 
-1. Abre Fritzing en tu máquina.
-2. Crea un nuevo proyecto o abre `fritzing_project/breadboard.svg` como referencia.
-3. Añade las partes reales desde la librería (ESP32, HC-SR04, relay, buzzer, LEDs) y conéctalas.
-4. Guarda como `wiring_esp32.fzz` con `File -> Save As...`.
+## Partes personalizadas usadas en este proyecto
+
+Este proyecto incluye partes personalizadas necesarias para abrir correctamente el archivo `.fzz` en Fritzing:
+
+- `fritzing_parts/my_parts.fzbz`
+- `fritzing_parts/1 chan 5v relay module.fzpz`
+
+Para usarlas en Fritzing:
+1. Abrir **Fritzing**
+2. Ir a **Window → Parts**
+3. Seleccionar **Import…**
+4. Elegir los archivos `.fzpz` o `.fzbz`
+
 
 

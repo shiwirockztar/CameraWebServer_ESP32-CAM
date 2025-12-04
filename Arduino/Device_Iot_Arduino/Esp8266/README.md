@@ -97,21 +97,37 @@ Puedes abrir `wiring.svg` desde tu editor o visualizarlo en un navegador.
 
 ![Breadboard preview](fritzing_project/breadboard.svg)
 
-Descargar proyecto Fritzing editable: [wiring.fzz](fritzing_project/wiring.fzz)
+- **Descripción:** Diagrama en vista Breadboard exportado desde Fritzing que muestra el conexionado físico (NodeMCU, HC-SR04, relé, buzzer, LEDs).
 
-## Proyecto Fritzing (editable)
+- **Archivo recomendado para previsualizar:** coloca la imagen exportada desde Fritzing en `fritzing_project/breadboard.png` o `fritzing_project/breadboard.svg`. Luego incrústala en este README con:
 
-- `fritzing_project/meta.xml`
-- `fritzing_project/breadboard.svg`
-- `fritzing_project/schematic.svg`
-- `fritzing_project/pcb.svg`
-- `fritzing_project/parts/README.txt` (instrucciones)
+	- PNG: `![Vista Breadboard](fritzing_project/breadboard.png)`
+	- SVG: `![Vista Breadboard](fritzing_project/breadboard.svg)`
 
-Instrucciones para obtener un `.fzz` editable:
+fritzing_project/
+│
+├── diagrama.fzz
+├── fritzing_parts/
+│     ├── my_parts.fzbz
+│     ├── 1 chan 5v relay module.fzpz
+│
+├── breadboard.svg
+├── breadboard.png
+└── README.md
 
-1. Abre Fritzing en tu máquina.
-2. Crea un nuevo proyecto o abre `fritzing_project/breadboard.svg` como referencia.
-3. Añade las partes reales desde la librería (NodeMCU, HC-SR04, relay, buzzer, LEDs) y conéctalas.
-4. Guarda el proyecto con `File -> Save As...` y elige `wiring.fzz`.
+## Partes personalizadas usadas en este proyecto
+
+Este proyecto incluye partes personalizadas necesarias para abrir correctamente el archivo `.fzz` en Fritzing:
+
+- `fritzing_parts/my_parts.fzbz`
+- `fritzing_parts/1 chan 5v relay module.fzpz`
+
+Para usarlas en Fritzing:
+1. Abrir **Fritzing**
+2. Ir a **Window → Parts**
+3. Seleccionar **Import…**
+4. Elegir los archivos `.fzpz` o `.fzbz`
+
+
 
 
