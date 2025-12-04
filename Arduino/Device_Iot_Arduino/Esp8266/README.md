@@ -2,6 +2,20 @@
 
 Este README indica el pinout y el cableado usado por el sketch `Device_Iot_Arduino_Esp82.ino` (NodeMCU / ESP8266).
 
+## Imagen del pinout (referencia)
+
+Se añade la URL con una imagen del pinout de NodeMCU V3 para referencia visual:
+
+<div align="center">
+	<img src="https://mischianti.org/wp-content/uploads/2021/10/NodeMcu-V3-CH340-Lua-ESP8266-pinout-mischianti-low-resolution.jpg" alt="NodeMCU V3 pinout" width="640" />
+</div>
+
+Usa esta imagen para verificar las etiquetas Dx ↔ GPIO cuando hagas el cableado.
+
+## Archivo relacionado
+
+- Sketch: `Device_Iot_Arduino_Esp82.ino` (ubicado en este mismo directorio)
+
 ## Pinout usado en el código
 
 Los siguientes pines aparecen en `Device_Iot_Arduino_Esp82.ino` como GPIO (números BCM de ESP8266). También se incluye la referencia física de NodeMCU (Dx):
@@ -30,19 +44,42 @@ Los siguientes pines aparecen en `Device_Iot_Arduino_Esp82.ino` como GPIO (núme
 - Asegúrate de alimentar correctamente el relé y el buzzer (si requieren más corriente, usar fuente externa y compartir GND).
 - El sensor ultrasónico necesita 5V o 3.3V según modelo; usa conversores de nivel si es necesario y comparte GND.
 
-## Imagen del pinout (referencia)
+## Vista previa del proyecto Fritzing (Breadboard)
 
-Se añade la URL con una imagen del pinout de NodeMCU V3 para referencia visual:
+![Breadboard preview](fritzing_project/breadboard.svg)
 
-<div align="center">
-	<img src="https://mischianti.org/wp-content/uploads/2021/10/NodeMcu-V3-CH340-Lua-ESP8266-pinout-mischianti-low-resolution.jpg" alt="NodeMCU V3 pinout" width="640" />
-</div>
+- **Descripción:** Diagrama en vista Breadboard exportado desde Fritzing que muestra el conexionado físico (NodeMCU, HC-SR04, relé, buzzer, LEDs).
 
-Usa esta imagen para verificar las etiquetas Dx ↔ GPIO cuando hagas el cableado.
+- **Archivo recomendado para previsualizar:** coloca la imagen exportada desde Fritzing en `fritzing_project/breadboard.png` o `fritzing_project/breadboard.svg`. Luego incrústala en este README con:
 
-## Archivo relacionado
+	- PNG: `![Vista Breadboard](fritzing_project/breadboard.png)`
+	- SVG: `![Vista Breadboard](fritzing_project/breadboard.svg)`
 
-- Sketch: `Device_Iot_Arduino_Esp82.ino` (ubicado en este mismo directorio)
+```
+fritzing_project/
+│
+├── diagrama.fzz
+├── fritzing_parts/
+│     ├── my_parts.fzbz
+│     ├── 1 chan 5v relay module.fzpz
+│
+├── breadboard.svg
+├── breadboard.png
+└── README.md
+```
+
+## Partes personalizadas usadas en este proyecto
+
+Este proyecto incluye partes personalizadas necesarias para abrir correctamente el archivo `.fzz` en Fritzing:
+
+- `fritzing_parts/my_parts.fzbz`
+- `fritzing_parts/1 chan 5v relay module.fzpz`
+
+Para usarlas en Fritzing:
+1. Abrir **Fritzing**
+2. Ir a **Window → Parts**
+3. Seleccionar **Import…**
+4. Elegir los archivos `.fzpz` o `.fzbz`
 
 
 ## Diagrama de conexión (ASCII) — ejemplo
@@ -93,42 +130,7 @@ He añadido un diagrama SVG con un esquema visual simple en este repositorio:
 - `wiring.svg` — diagrama visual del conexionado (NodeMCU, HC-SR04, relay, buzzer, LEDs)
 Puedes abrir `wiring.svg` desde tu editor o visualizarlo en un navegador.
 
-**Vista previa del proyecto Fritzing (Breadboard)**
 
-![Breadboard preview](fritzing_project/breadboard.svg)
-
-- **Descripción:** Diagrama en vista Breadboard exportado desde Fritzing que muestra el conexionado físico (NodeMCU, HC-SR04, relé, buzzer, LEDs).
-
-- **Archivo recomendado para previsualizar:** coloca la imagen exportada desde Fritzing en `fritzing_project/breadboard.png` o `fritzing_project/breadboard.svg`. Luego incrústala en este README con:
-
-	- PNG: `![Vista Breadboard](fritzing_project/breadboard.png)`
-	- SVG: `![Vista Breadboard](fritzing_project/breadboard.svg)`
-
-```
-fritzing_project/
-│
-├── diagrama.fzz
-├── fritzing_parts/
-│     ├── my_parts.fzbz
-│     ├── 1 chan 5v relay module.fzpz
-│
-├── breadboard.svg
-├── breadboard.png
-└── README.md
-```
-
-## Partes personalizadas usadas en este proyecto
-
-Este proyecto incluye partes personalizadas necesarias para abrir correctamente el archivo `.fzz` en Fritzing:
-
-- `fritzing_parts/my_parts.fzbz`
-- `fritzing_parts/1 chan 5v relay module.fzpz`
-
-Para usarlas en Fritzing:
-1. Abrir **Fritzing**
-2. Ir a **Window → Parts**
-3. Seleccionar **Import…**
-4. Elegir los archivos `.fzpz` o `.fzbz`
 
 
 
