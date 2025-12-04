@@ -104,6 +104,7 @@ Puedes abrir `wiring.svg` desde tu editor o visualizarlo en un navegador.
 	- PNG: `![Vista Breadboard](fritzing_project/breadboard.png)`
 	- SVG: `![Vista Breadboard](fritzing_project/breadboard.svg)`
 
+```
 fritzing_project/
 │
 ├── diagrama.fzz
@@ -114,6 +115,7 @@ fritzing_project/
 ├── breadboard.svg
 ├── breadboard.png
 └── README.md
+```
 
 ## Partes personalizadas usadas en este proyecto
 

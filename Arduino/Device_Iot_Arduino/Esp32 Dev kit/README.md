@@ -73,6 +73,7 @@ Recomendación: conecta primero en protoboard y mide señales antes de alimentar
 
 Descargar proyecto Fritzing editable: [wiring_esp32.fzz](fritzing_project/wiring_esp32.fzz)
 
+```
 fritzing_project/
 │
 ├── diagrama.fzz
@@ -83,6 +84,7 @@ fritzing_project/
 ├── breadboard.svg
 ├── breadboard.png
 └── README.md
+```
 
 ## Partes personalizadas usadas en este proyecto
 
